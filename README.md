@@ -6,14 +6,14 @@ Building a neighbourhood-level pollution map combining citizen-uploaded photos o
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript 5 (strict mode) |
-| Styling | Tailwind CSS 4 |
-| Linting | ESLint 9 |
-| Formatting | Prettier 3 |
-| Runtime | Node.js 18+ |
+| Layer      | Technology                 |
+| ---------- | -------------------------- |
+| Framework  | Next.js 15 (App Router)    |
+| Language   | TypeScript 5 (strict mode) |
+| Styling    | Tailwind CSS 4             |
+| Linting    | ESLint 9                   |
+| Formatting | Prettier 3                 |
+| Runtime    | Node.js 18+                |
 
 ## Getting Started
 
@@ -56,16 +56,16 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Available Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the development server |
-| `npm run build` | Create a production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | Run ESLint on all files |
-| `npm run lint:fix` | Run ESLint and auto-fix issues |
-| `npm run format` | Format all files with Prettier |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start the development server             |
+| `npm run build`        | Create a production build                |
+| `npm run start`        | Serve the production build               |
+| `npm run lint`         | Run ESLint on all files                  |
+| `npm run lint:fix`     | Run ESLint and auto-fix issues           |
+| `npm run format`       | Format all files with Prettier           |
 | `npm run format:check` | Check formatting without modifying files |
-| `npm run type-check` | Run TypeScript compiler check (no emit) |
+| `npm run type-check`   | Run TypeScript compiler check (no emit)  |
 
 ## Project Structure
 
