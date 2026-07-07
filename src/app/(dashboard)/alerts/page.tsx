@@ -1,24 +1,68 @@
-import type { Metadata } from 'next';
-import { PageHeader } from '@/components/feedback/page-header';
-import { EmptyState } from '@/components/feedback/empty-state';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Alerts',
-  description: 'Pollution and air quality alerts',
-};
+import { useState, useEffect } from 'react';
+import type { PollutionAlert } from '@/types/alert';
+import { PageHeader } from '@/components/feedback/page-header';
+import { AlertCard } from '@/components/alerts/alert-card';
+import { AlertFilters, type AlertFilterState } from '@/components/alerts/alert-filters';
+import { Bell } from 'lucide-react';
 
 export default function AlertsPage() {
+  const [alerts, setAlerts] = useState<PollutionAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<AlertFilterState>({ priority: 'all', status: 'all' });
+
+  useEffect(() => {
+    fetch('/api/alerts')
+      .then((r) => r.json())
+      .then((data) => { setAlerts(data.alerts ?? []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const filtered = alerts.filter((a) => {
+    if (filters.priority !== 'all' && a.priority !== filters.priority) return false;
+    if (filters.status !== 'all' && a.status !== filters.status) return false;
+    return true;
+  });
+
+  const activeCount = alerts.filter((a) => a.status === 'active' || a.status === 'dispatched').length;
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Alerts"
-        description="Pollution spike alerts and air quality notifications."
-      />
-      <EmptyState
-        iconName="Bell"
-        title="No active alerts"
-        description="Multilingual pollution alerts and push notifications will appear here."
-      />
+      <div className="flex items-start justify-between">
+        <PageHeader
+          title="Alerts"
+          description="Real-time pollution and air quality alerts from the monitoring network."
+        />
+        {activeCount > 0 && (
+          <div className="flex items-center gap-2 mt-1 text-sm font-medium text-red-400">
+            <span className="size-2 rounded-full bg-red-400 animate-pulse" />
+            {activeCount} active
+          </div>
+        )}
+      </div>
+
+      <AlertFilters filters={filters} onChange={setFilters} />
+
+      {loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-4 h-36 animate-pulse" />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Bell className="size-12 text-muted-foreground mb-3" />
+          <p className="font-medium">No alerts match your filters</p>
+          <p className="text-sm text-muted-foreground mt-1">Adjust the filters above to see more alerts.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filtered.map((alert) => (
+            <AlertCard key={alert.id} alert={alert} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
