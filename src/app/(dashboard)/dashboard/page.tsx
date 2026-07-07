@@ -1,4 +1,6 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/feedback/page-header';
 import { StatsCards } from '@/components/dashboard/stats-cards';
 import { AqiTrendChart } from '@/components/dashboard/aqi-trend-chart';
@@ -6,33 +8,40 @@ import { SourceBreakdown } from '@/components/dashboard/source-breakdown';
 import { RecentAlerts } from '@/components/dashboard/recent-alerts';
 import { MiniMap } from '@/components/dashboard/mini-map';
 
-export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Overview of air quality and pollution activity',
-};
+export default function DashboardPage() {
+  const [data, setData] = useState<any>(null);
 
-async function getDashboardData() {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  useEffect(() => {
+    async function fetchAll() {
+      const [statsRes, alertsRes, reportsRes, predictionsRes, hotspotsRes] = await Promise.allSettled([
+        fetch('/api/stats'),
+        fetch('/api/alerts'),
+        fetch('/api/reports'),
+        fetch('/api/predictions'),
+        fetch('/api/hotspots'),
+      ]);
 
-  const [statsRes, alertsRes, reportsRes, predictionsRes, hotspotsRes] = await Promise.allSettled([
-    fetch(`${base}/api/stats`, { next: { revalidate: 60 } }),
-    fetch(`${base}/api/alerts`, { next: { revalidate: 60 } }),
-    fetch(`${base}/api/reports`, { next: { revalidate: 60 } }),
-    fetch(`${base}/api/predictions`, { next: { revalidate: 300 } }),
-    fetch(`${base}/api/hotspots`, { next: { revalidate: 60 } }),
-  ]);
+      setData({
+        stats: statsRes.status === 'fulfilled' && statsRes.value.ok ? await statsRes.value.json() : null,
+        alerts: alertsRes.status === 'fulfilled' && alertsRes.value.ok ? await alertsRes.value.json() : null,
+        reports: reportsRes.status === 'fulfilled' && reportsRes.value.ok ? await reportsRes.value.json() : null,
+        predictions: predictionsRes.status === 'fulfilled' && predictionsRes.value.ok ? await predictionsRes.value.json() : null,
+        hotspots: hotspotsRes.status === 'fulfilled' && hotspotsRes.value.ok ? await hotspotsRes.value.json() : null,
+      });
+    }
+    fetchAll();
+  }, []);
 
-  return {
-    stats: statsRes.status === 'fulfilled' && statsRes.value.ok ? await statsRes.value.json() : null,
-    alerts: alertsRes.status === 'fulfilled' && alertsRes.value.ok ? await alertsRes.value.json() : null,
-    reports: reportsRes.status === 'fulfilled' && reportsRes.value.ok ? await reportsRes.value.json() : null,
-    predictions: predictionsRes.status === 'fulfilled' && predictionsRes.value.ok ? await predictionsRes.value.json() : null,
-    hotspots: hotspotsRes.status === 'fulfilled' && hotspotsRes.value.ok ? await hotspotsRes.value.json() : null,
-  };
-}
+  if (!data) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Dashboard" description="Real-time overview of air quality and pollution activity in Delhi." />
+        <div className="p-8 text-center text-muted-foreground animate-pulse">Loading real-time data...</div>
+      </div>
+    );
+  }
 
-export default async function DashboardPage() {
-  const { stats, alerts, reports, predictions, hotspots } = await getDashboardData();
+  const { stats, alerts, reports, predictions, hotspots } = data;
 
   return (
     <div className="space-y-6">

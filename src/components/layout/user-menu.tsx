@@ -36,14 +36,14 @@ export function UserMenu() {
             size="icon"
             className="rounded-full"
             aria-label="User menu"
-          />
+          >
+            <Avatar className="size-7">
+              {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />}
+              <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
+            </Avatar>
+          </Button>
         }
-      >
-        <Avatar className="size-7">
-          {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />}
-          <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
+      />
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuLabel>
           <div className="flex flex-col gap-0.5">
