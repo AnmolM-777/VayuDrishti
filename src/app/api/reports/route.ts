@@ -37,4 +37,4 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export const revalidate = 60;
+

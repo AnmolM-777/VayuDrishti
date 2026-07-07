@@ -9,6 +9,7 @@ import { RecentAlerts } from '@/components/dashboard/recent-alerts';
 import { MiniMap } from '@/components/dashboard/mini-map';
 
 export default function DashboardPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
