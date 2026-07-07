@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import type { PollutionHotspot } from '@/types/hotspot';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
 import { cn } from '@/lib/utils';

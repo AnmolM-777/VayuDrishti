@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import type { PollutionFingerprint } from '@/types/report';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
-import { cn } from '@/lib/utils';
+
 
 interface AiAnalysisDisplayProps {
   status: 'idle' | 'scanning' | 'complete' | 'error';

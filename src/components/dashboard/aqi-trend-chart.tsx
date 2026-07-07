@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -55,7 +53,9 @@ function CustomTooltip({
   label?: number;
 }) {
   if (!active || !payload?.length) return null;
-  const aqi = payload[0].value;
+  const item = payload[0];
+  if (!item) return null;
+  const aqi = item.value;
   const color = getAqiColor(aqi);
   return (
     <div className="bg-popover border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
@@ -63,7 +63,7 @@ function CustomTooltip({
       <p className="font-bold text-sm" style={{ color }}>
         AQI {aqi}
       </p>
-      <p className="text-muted-foreground capitalize">{payload[0].payload.category.replace('_', ' ')}</p>
+      <p className="text-muted-foreground capitalize">{item.payload.category.replace('_', ' ')}</p>
     </div>
   );
 }

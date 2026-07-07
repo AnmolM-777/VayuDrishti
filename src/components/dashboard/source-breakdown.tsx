@@ -18,10 +18,12 @@ function CustomTooltip({
   payload?: Array<{ name: string; value: number; payload: { color: string } }>;
 }) {
   if (!active || !payload?.length) return null;
+  const item = payload[0];
+  if (!item) return null;
   return (
     <div className="bg-popover border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
-      <p className="font-medium">{payload[0].name}</p>
-      <p className="text-muted-foreground">{payload[0].value} reports</p>
+      <p className="font-medium">{item.name}</p>
+      <p className="text-muted-foreground">{item.value} reports</p>
     </div>
   );
 }

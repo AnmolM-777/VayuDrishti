@@ -34,10 +34,12 @@ function formatHour(h: number) {
 
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{value: number; payload: {category: string; confidence: number}}>; label?: number }) {
   if (!active || !payload?.length) return null;
-  const aqi = payload[0].value;
+  const item = payload[0];
+  if (!item) return null;
+  const aqi = item.value;
   const color = getAqiColor(aqi);
-  const cat = payload[0].payload.category.replace('_', ' ');
-  const conf = Math.round(payload[0].payload.confidence * 100);
+  const cat = item.payload.category.replace('_', ' ');
+  const conf = Math.round(item.payload.confidence * 100);
   return (
     <div className="bg-popover border border-border rounded-lg px-3 py-2 text-xs shadow-lg space-y-1">
       <p className="text-muted-foreground font-medium">{label !== undefined ? formatHour(label) : ''}</p>

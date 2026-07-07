@@ -17,7 +17,7 @@ async function fileToBase64(file: File): Promise<string> {
     reader.onload = () => {
       const result = reader.result as string;
       // Strip the data URL prefix
-      resolve(result.split(',')[1]);
+      resolve(result.split(',')[1] ?? '');
     };
     reader.onerror = reject;
   });

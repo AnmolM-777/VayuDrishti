@@ -12,7 +12,6 @@ const STEPS = ['Photo', 'Location', 'Details', 'AI Results'];
 
 export function ReportForm() {
   const [step, setStep] = useState(0);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | undefined>();
   const [photoBase64, setPhotoBase64] = useState<string | undefined>();
   const [location, setLocation] = useState<GeoLocation | undefined>();
@@ -22,8 +21,7 @@ export function ReportForm() {
   const [analysisError, setAnalysisError] = useState<string | undefined>();
   const [submitted, setSubmitted] = useState(false);
 
-  function handlePhotoSelected(file: File, preview: string, base64: string) {
-    setPhotoFile(file);
+  function handlePhotoSelected(_file: File, preview: string, base64: string) {
     setPhotoPreview(preview);
     setPhotoBase64(base64);
   }
@@ -74,7 +72,7 @@ export function ReportForm() {
         </p>
         <button
           onClick={() => {
-            setStep(0); setPhotoFile(null); setPhotoPreview(undefined); setPhotoBase64(undefined);
+            setStep(0); setPhotoPreview(undefined); setPhotoBase64(undefined);
             setLocation(undefined); setDescription(''); setAnalysisStatus('idle');
             setFingerprint(undefined); setSubmitted(false);
           }}
@@ -124,7 +122,7 @@ export function ReportForm() {
             <PhotoCapture
               onPhotoSelected={handlePhotoSelected}
               preview={photoPreview}
-              onClear={() => { setPhotoFile(null); setPhotoPreview(undefined); setPhotoBase64(undefined); }}
+              onClear={() => { setPhotoPreview(undefined); setPhotoBase64(undefined); }}
             />
             <button
               onClick={() => setStep(1)}

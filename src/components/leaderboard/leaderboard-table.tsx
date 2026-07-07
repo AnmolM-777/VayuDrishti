@@ -3,7 +3,7 @@
 import type { UserProfile } from '@/types/user';
 import { SENTINEL_LEVEL_CONFIG, BADGE_CONFIG } from '@/types/user';
 import { cn } from '@/lib/utils';
-import { Trophy, TrendingUp } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 interface LeaderboardTableProps {
   users: UserProfile[];

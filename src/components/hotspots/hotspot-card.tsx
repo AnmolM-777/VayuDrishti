@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
-import { MapPin, Users, Radio, ArrowRight } from 'lucide-react';
+import { MapPin, Users, Radio } from 'lucide-react';
 import type { PollutionHotspot } from '@/types/hotspot';
 import { HOTSPOT_SEVERITY_CONFIG, HOTSPOT_STATUS_CONFIG } from '@/types/hotspot';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';

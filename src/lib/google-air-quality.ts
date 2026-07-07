@@ -9,7 +9,7 @@
  * to build a MonitoringStation[] compatible with the existing types.
  */
 
-import type { MonitoringStation, StationReading, AQICategory } from '@/types/station';
+import type { MonitoringStation, StationReading } from '@/types/station';
 import { getAQICategory } from '@/types/station';
 
 const AIR_QUALITY_API = 'https://airquality.googleapis.com/v1/currentConditions:lookup';
@@ -134,7 +134,8 @@ export async function fetchDelhiStationsViaGoogleAQ(): Promise<MonitoringStation
 
   const stations: MonitoringStation[] = DELHI_MONITORING_LOCATIONS.map((loc, idx) => {
     const result = results[idx];
-    const data = result.status === 'fulfilled' ? result.value : null;
+    const data =
+      result !== undefined && result.status === 'fulfilled' ? result.value : null;
 
     return {
       id: loc.id,

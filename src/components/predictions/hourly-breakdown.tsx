@@ -30,7 +30,9 @@ export function HourlyBreakdown({ forecast, currentHour }: HourlyBreakdownProps)
       <h3 className="font-semibold mb-4">Hour-by-Hour Breakdown</h3>
       <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12 gap-2">
         {forecast.map((entry) => {
-          const cfg = CATEGORY_CONFIG[entry.category] ?? CATEGORY_CONFIG.moderate;
+          const fallback = { color: '#f59e0b', bg: 'bg-amber-500/10', label: 'Moderate' };
+          const cfg: { color: string; bg: string; label: string } =
+            CATEGORY_CONFIG[entry.category] ?? fallback;
           const isNow = entry.hour === currentHour;
           return (
             <div

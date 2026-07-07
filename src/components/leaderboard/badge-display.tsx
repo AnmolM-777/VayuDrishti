@@ -2,7 +2,6 @@
 
 import type { UserProfile } from '@/types/user';
 import { BADGE_CONFIG, SENTINEL_LEVEL_CONFIG } from '@/types/user';
-import { cn } from '@/lib/utils';
 
 interface BadgeDisplayProps {
   user: UserProfile;

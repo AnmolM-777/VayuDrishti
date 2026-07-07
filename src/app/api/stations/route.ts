@@ -17,7 +17,7 @@ import type { StationsResponse } from '@/types/station';
 let cache: { data: StationsResponse; expiresAt: number } | null = null;
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Serve from cache if fresh
     if (cache && Date.now() < cache.expiresAt) {

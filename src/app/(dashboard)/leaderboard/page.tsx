@@ -21,7 +21,7 @@ export default function LeaderboardPage() {
         const sorted = (data.users ?? []) as UserProfile[];
         setUsers(sorted);
         // Default: show top user stats
-        if (sorted.length > 0) setSelectedUser(sorted[0]);
+        if (sorted.length > 0 && sorted[0]) setSelectedUser(sorted[0]);
         setLoading(false);
       })
       .catch(() => setLoading(false));

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { PollutionSourceType } from '@/types/report';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
-import { Layers, Clock } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface MapFilterState {
