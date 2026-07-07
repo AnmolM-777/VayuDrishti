@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function UserMenu() {
   const { user, signOut, isFirebaseConfigured } = useAuth();
@@ -58,11 +59,11 @@ export function UserMenu() {
           <Trophy className="mr-2 size-4 text-amber-400" />
           My Rankings
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.info('Profile page coming soon!')}>
           <User className="mr-2 size-4" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.info('Settings page coming soon!')}>
           <Settings className="mr-2 size-4" />
           Settings
         </DropdownMenuItem>

@@ -3,6 +3,7 @@ import { Geist, JetBrains_Mono } from 'next/font/google';
 import { ThemeProvider } from '@/providers/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AuthProvider } from '@/lib/auth-context';
+import { Toaster } from 'sonner';
 import { cn } from '@/lib/utils';
 import './globals.css';
 
@@ -72,6 +73,7 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <TooltipProvider>{children}</TooltipProvider>
+            <Toaster richColors position="top-center" />
           </ThemeProvider>
         </AuthProvider>
       </body>
