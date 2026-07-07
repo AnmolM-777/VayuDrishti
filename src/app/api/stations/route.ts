@@ -47,6 +47,22 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('[/api/stations] Error:', error);
+
+    // Graceful fallback: return sample stations when OpenAQ key is missing/invalid
+    // This lets the app run in demo mode without an OpenAQ API key
+    const { getSampleStations } = await import('@/lib/sample-data');
+    const sampleStations = getSampleStations();
+    if (sampleStations.length > 0) {
+      console.warn('[/api/stations] Falling back to sample station data');
+      const fallback: StationsResponse = {
+        success: true,
+        stations: sampleStations,
+        lastSynced: new Date().toISOString(),
+      };
+      cache = { data: fallback, expiresAt: Date.now() + CACHE_TTL_MS };
+      return NextResponse.json(fallback);
+    }
+
     return NextResponse.json<StationsResponse>(
       {
         success: false,
