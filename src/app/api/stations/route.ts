@@ -102,3 +102,5 @@ export async function GET(_request: NextRequest) {
     }
   }
 }
+
+export const revalidate = 60;
