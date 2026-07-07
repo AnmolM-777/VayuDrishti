@@ -7,7 +7,7 @@ import type { MonitoringStation } from '@/types/station';
 import type { PollutionReport } from '@/types/report';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
 import { HOTSPOT_SEVERITY_CONFIG } from '@/types/hotspot';
-import { MapPin, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PollutionMapProps {
@@ -122,14 +122,14 @@ function MapPlaceholder({ hotspots, stations }: { hotspots: PollutionHotspot[]; 
 
 export function PollutionMap({ hotspots, stations, reports, className }: PollutionMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     loadGoogleMaps()
-      .then((goog) => {
-        if (!mapRef.current) return;
-        const map = new goog.maps.Map(mapRef.current, {
+      .then(() => {
+        if (!mapRef.current || !window.google) return;
+        const google = window.google;
+        const map = new google.maps.Map(mapRef.current, {
           center: { lat: 28.6139, lng: 77.209 },
           zoom: 11,
           mapTypeId: 'roadmap',
@@ -147,11 +147,12 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
         const heatmapData = reports
           .filter((r) => r.aiAnalysis)
           .map((r) => ({
-            location: new goog.maps.LatLng(r.location.lat, r.location.lng),
+            location: new google.maps.LatLng(r.location.lat, r.location.lng),
             weight: r.aiAnalysis!.severity,
           }));
 
-        new goog.maps.visualization.HeatmapLayer({
+        // @ts-expect-error google.maps types incorrectly mark HeatmapLayer constructor as taking 0 args
+        new google.maps.visualization.HeatmapLayer({
           data: heatmapData,
           map,
           radius: 40,
@@ -162,12 +163,12 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
         hotspots.forEach((hs) => {
           const color = HOTSPOT_SEVERITY_CONFIG[hs.severity].color;
           const emoji = SOURCE_TYPE_CONFIG[hs.sourceType]?.emoji ?? '❓';
-          const marker = new goog.maps.Marker({
+          const marker = new google.maps.Marker({
             position: { lat: hs.location.lat, lng: hs.location.lng },
             map,
             label: { text: emoji, fontSize: '18px' },
             icon: {
-              path: goog.maps.SymbolPath.CIRCLE,
+              path: google.maps.SymbolPath.CIRCLE,
               fillColor: color,
               fillOpacity: 0.9,
               strokeColor: '#fff',
@@ -175,7 +176,7 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
               scale: 14,
             },
           });
-          const infoWindow = new goog.maps.InfoWindow({
+          const infoWindow = new google.maps.InfoWindow({
             content: `<div style="color:#000;padding:4px">
               <strong>${emoji} ${SOURCE_TYPE_CONFIG[hs.sourceType]?.label}</strong><br/>
               ${hs.location.address}<br/>
@@ -190,12 +191,12 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
         stations.forEach((stn) => {
           if (!stn.latestReading) return;
           const color = getAqiColor(stn.latestReading.aqi);
-          const marker = new goog.maps.Marker({
+          const marker = new google.maps.Marker({
             position: { lat: stn.location.lat, lng: stn.location.lng },
             map,
             label: { text: `${stn.latestReading.aqi}`, color: '#fff', fontSize: '10px', fontWeight: 'bold' },
             icon: {
-              path: goog.maps.SymbolPath.CIRCLE,
+              path: google.maps.SymbolPath.CIRCLE,
               fillColor: color,
               fillOpacity: 0.85,
               strokeColor: '#fff',
@@ -203,7 +204,7 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
               scale: 16,
             },
           });
-          const infoWindow = new goog.maps.InfoWindow({
+          const infoWindow = new google.maps.InfoWindow({
             content: `<div style="color:#000;padding:4px">
               <strong>${stn.name}</strong><br/>
               AQI ${stn.latestReading.aqi} (${stn.latestReading.category})<br/>
@@ -213,7 +214,6 @@ export function PollutionMap({ hotspots, stations, reports, className }: Polluti
           marker.addListener('click', () => infoWindow.open({ anchor: marker, map }));
         });
 
-        setMapLoaded(true);
       })
       .catch((err) => {
         setMapError(err.message);
