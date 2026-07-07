@@ -5,7 +5,7 @@
  * Query params: ?status=detected&severity=critical (optional filters)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { getSampleHotspots } from '@/lib/sample-data';
 import type { PollutionHotspot, HotspotStatus, HotspotSeverity } from '@/types/hotspot';

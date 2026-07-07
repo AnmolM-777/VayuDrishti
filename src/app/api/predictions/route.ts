@@ -5,7 +5,7 @@
  * Query params: ?city=Delhi (optional)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { getSamplePrediction } from '@/lib/sample-data';
 import type { PredictionResponse } from '@/types/prediction';

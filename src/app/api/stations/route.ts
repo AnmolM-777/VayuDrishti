@@ -10,7 +10,7 @@
  * Returns: { success, stations: MonitoringStation[], lastSynced }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import type { StationsResponse } from '@/types/station';
 
 // In-memory cache to avoid hammering APIs
@@ -36,7 +36,7 @@ export async function GET(_request: NextRequest) {
         if (googleStations.length > 0) {
           stations = googleStations;
           source = 'google_aq';
-          console.log(`[/api/stations] ✓ Google AQ: ${googleStations.length} stations`);
+          // console.log(`[/api/stations] ✓ Google AQ: ${googleStations.length} stations`);
         }
       } catch (err) {
         console.warn('[/api/stations] Google AQ failed:', err instanceof Error ? err.message : err);
@@ -53,7 +53,7 @@ export async function GET(_request: NextRequest) {
           if (openaqStations.length > 0) {
             stations = openaqStations;
             source = 'openaq';
-            console.log(`[/api/stations] ✓ OpenAQ: ${openaqStations.length} stations`);
+            // console.log(`[/api/stations] ✓ OpenAQ: ${openaqStations.length} stations`);
           }
         } catch (err) {
           console.warn('[/api/stations] OpenAQ failed:', err instanceof Error ? err.message : err);
@@ -66,7 +66,7 @@ export async function GET(_request: NextRequest) {
       const { getSampleStations } = await import('@/lib/sample-data');
       stations = getSampleStations();
       source = 'sample';
-      console.log(`[/api/stations] ↩ Using sample data (${stations.length} stations)`);
+      // console.log(`[/api/stations] ↩ Using sample data (${stations.length} stations)`);
     }
 
     const response: StationsResponse = {

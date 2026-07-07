@@ -51,6 +51,7 @@ export function PhotoCapture({ onPhotoSelected, preview, onClear }: PhotoCapture
   if (preview) {
     return (
       <div className="relative rounded-xl overflow-hidden border border-border group">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={preview} alt="Selected photo" className="w-full object-cover max-h-64" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
           <button

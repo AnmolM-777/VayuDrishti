@@ -11,7 +11,7 @@
  *   { success, fingerprint?: PollutionFingerprint, error? }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { analyzePollutionPhoto } from '@/lib/gemini';
 import type { AnalyzePhotoRequest, AnalyzePhotoResponse } from '@/types/report';

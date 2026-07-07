@@ -137,7 +137,7 @@ export function ReportForm() {
         {step === 1 && (
           <div className="space-y-4">
             <h3 className="font-semibold">Step 2: Confirm Location</h3>
-            <p className="text-sm text-muted-foreground">We'll detect your GPS location automatically.</p>
+            <p className="text-sm text-muted-foreground">We&apos;ll detect your GPS location automatically.</p>
             <LocationPicker onLocationSelected={setLocation} location={location} />
             <div className="flex gap-3">
               <button onClick={() => setStep(0)} className="flex-1 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-accent transition-colors">

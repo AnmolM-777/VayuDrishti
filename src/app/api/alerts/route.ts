@@ -5,7 +5,7 @@
  * Query params: ?status=active&priority=red (optional filters)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { getSampleAlerts } from '@/lib/sample-data';
 import type { PollutionAlert, AlertPriority, AlertStatus } from '@/types/alert';

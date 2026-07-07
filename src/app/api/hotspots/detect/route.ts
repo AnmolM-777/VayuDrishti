@@ -12,7 +12,7 @@
  *   { success, hotspotsCreated, hotspotsUpdated, hotspots[] }
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { detectHotspots } from '@/lib/clustering';
 import { getSampleReports } from '@/lib/sample-data';

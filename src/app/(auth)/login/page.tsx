@@ -46,7 +46,7 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground mt-1 font-medium">वायुदृष्टि · AI Pollution Intelligence</p>
         </div>
         <p className="text-sm text-muted-foreground">
-          Join Delhi's network of citizen air quality sentinels.
+          Join Delhi&apos;s network of citizen air quality sentinels.
         </p>
       </div>
 
@@ -107,7 +107,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-xs text-muted-foreground text-center">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="text-primary hover:underline font-medium">
             Register
           </Link>

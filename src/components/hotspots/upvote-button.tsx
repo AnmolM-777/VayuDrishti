@@ -9,7 +9,7 @@ interface UpvoteButtonProps {
   hotspotId: string;
 }
 
-export function UpvoteButton({ count, hotspotId }: UpvoteButtonProps) {
+export function UpvoteButton({ count, hotspotId: _hotspotId }: UpvoteButtonProps) {
   const [voted, setVoted] = useState(false);
   const [displayCount, setDisplayCount] = useState(count);
   const [animating, setAnimating] = useState(false);
@@ -21,7 +21,7 @@ export function UpvoteButton({ count, hotspotId }: UpvoteButtonProps) {
     setAnimating(true);
     setTimeout(() => setAnimating(false), 500);
     // In production: POST /api/hotspots/${hotspotId}/upvote
-    console.log('Upvote hotspot:', hotspotId);
+    // console.log('Upvote hotspot:', hotspotId);
   }
 
   return (

@@ -5,7 +5,7 @@
  * Query params: ?status=pending&sourceType=garbage_burning (optional filters)
  */
 
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 import { getSampleReports } from '@/lib/sample-data';
 import type { PollutionReport, ReportStatus, PollutionSourceType } from '@/types/report';
