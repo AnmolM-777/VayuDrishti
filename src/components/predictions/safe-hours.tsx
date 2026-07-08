@@ -30,7 +30,12 @@ function groupConsecutive(hours: number[]): number[][] {
     const curr = sorted[i];
     const prev = sorted[i - 1];
     const lastGroup = groups[groups.length - 1];
-    if (curr !== undefined && prev !== undefined && lastGroup && curr === prev + 1) {
+    if (
+      curr !== undefined &&
+      prev !== undefined &&
+      lastGroup &&
+      curr === prev + 1
+    ) {
       lastGroup.push(curr);
     } else if (curr !== undefined) {
       groups.push([curr]);
@@ -44,41 +49,53 @@ export function SafeHours({ safeHours, forecast }: SafeHoursProps) {
   const totalSafe = safeHours.length;
 
   // Best single window
-  const bestGroup = groups.length > 0
-    ? [...groups].sort((a, b) => b.length - a.length)[0]
-    : undefined;
+  const bestGroup =
+    groups.length > 0
+      ? [...groups].sort((a, b) => b.length - a.length)[0]
+      : undefined;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-card border-border rounded-xl border p-5">
+      <div className="mb-4 flex items-start justify-between">
         <div>
           <h3 className="font-semibold">Safe Hours for Outdoor Activity</h3>
-          <p className="text-muted-foreground text-xs mt-0.5">AQI ≤ 100 (Good / Satisfactory)</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            AQI ≤ 100 (Good / Satisfactory)
+          </p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-emerald-400">{totalSafe}h</p>
-          <p className="text-xs text-muted-foreground">of 24h safe</p>
+          <p className="text-muted-foreground text-xs">of 24h safe</p>
         </div>
       </div>
 
       {totalSafe === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Cloud className="size-10 text-red-400 mb-2" />
-          <p className="font-medium text-sm text-red-400">No safe hours today</p>
-          <p className="text-xs text-muted-foreground mt-1">Avoid prolonged outdoor exposure. Wear N95 masks if going out.</p>
+          <Cloud className="mb-2 size-10 text-red-400" />
+          <p className="text-sm font-medium text-red-400">
+            No safe hours today
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Avoid prolonged outdoor exposure. Wear N95 masks if going out.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
           {/* Best window highlight */}
           {bestGroup && (
-            <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-lg p-3">
+            <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 p-3">
               <div className="flex items-center gap-2">
                 <Sun className="size-4 text-emerald-400" />
                 <div>
                   <p className="text-sm font-semibold text-emerald-400">
-                    Best window: {formatHour(bestGroup[0] ?? 0)} – {formatHour(((bestGroup[bestGroup.length - 1] ?? 0) + 1) % 24)}
+                    Best window: {formatHour(bestGroup[0] ?? 0)} –{' '}
+                    {formatHour(
+                      ((bestGroup[bestGroup.length - 1] ?? 0) + 1) % 24,
+                    )}
                   </p>
-                  <p className="text-xs text-muted-foreground">{bestGroup.length} consecutive safe hours</p>
+                  <p className="text-muted-foreground text-xs">
+                    {bestGroup.length} consecutive safe hours
+                  </p>
                 </div>
               </div>
             </div>
@@ -86,24 +103,30 @@ export function SafeHours({ safeHours, forecast }: SafeHoursProps) {
 
           {/* 24h bar visualization */}
           <div>
-            <p className="text-xs text-muted-foreground mb-2">24-hour air quality timeline</p>
-            <div className="flex gap-0.5 rounded-md overflow-hidden">
+            <p className="text-muted-foreground mb-2 text-xs">
+              24-hour air quality timeline
+            </p>
+            <div className="flex gap-0.5 overflow-hidden rounded-md">
               {forecast.map((f) => {
                 const isSafe = safeHours.includes(f.hour);
-                const color = isSafe ? '#22c55e' :
-                  f.predictedAqi <= 200 ? '#f59e0b' :
-                  f.predictedAqi <= 300 ? '#f97316' : '#ef4444';
+                const color = isSafe
+                  ? '#22c55e'
+                  : f.predictedAqi <= 200
+                    ? '#f59e0b'
+                    : f.predictedAqi <= 300
+                      ? '#f97316'
+                      : '#ef4444';
                 return (
                   <div
                     key={f.hour}
-                    className="flex-1 h-6 group relative cursor-default transition-opacity hover:opacity-80"
+                    className="group relative h-6 flex-1 cursor-default transition-opacity hover:opacity-80"
                     style={{ backgroundColor: color }}
                     title={`${formatHour(f.hour)}: AQI ${f.predictedAqi}`}
                   />
                 );
               })}
             </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+            <div className="text-muted-foreground mt-1 flex justify-between text-[10px]">
               <span>12 AM</span>
               <span>6 AM</span>
               <span>12 PM</span>
@@ -117,19 +140,29 @@ export function SafeHours({ safeHours, forecast }: SafeHoursProps) {
             {groups.map((group, i) => {
               const Icon = getTimeOfDayIcon(group[0] ?? 0);
               const avgAqi = Math.round(
-                group.reduce((sum, h) => sum + (forecast.find((f) => f.hour === h)?.predictedAqi ?? 0), 0) / group.length,
+                group.reduce(
+                  (sum, h) =>
+                    sum +
+                    (forecast.find((f) => f.hour === h)?.predictedAqi ?? 0),
+                  0,
+                ) / group.length,
               );
               return (
                 <div key={i} className="flex items-center gap-3 text-xs">
-                  <Icon className="size-3.5 text-emerald-400 shrink-0" />
+                  <Icon className="size-3.5 shrink-0 text-emerald-400" />
                   <span className="font-medium">
-                    {formatHour(group[0] ?? 0)} – {formatHour(((group[group.length - 1] ?? 0) + 1) % 24)}
+                    {formatHour(group[0] ?? 0)} –{' '}
+                    {formatHour(((group[group.length - 1] ?? 0) + 1) % 24)}
                   </span>
-                  <span className="text-muted-foreground">{group.length}h · avg AQI {avgAqi}</span>
+                  <span className="text-muted-foreground">
+                    {group.length}h · avg AQI {avgAqi}
+                  </span>
                   <span
                     className={cn(
-                      'ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold',
-                      group.length >= 4 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-lime-500/10 text-lime-400',
+                      'ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                      group.length >= 4
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'bg-lime-500/10 text-lime-400',
                     )}
                   >
                     {group.length >= 4 ? 'Ideal' : 'OK'}
@@ -142,8 +175,12 @@ export function SafeHours({ safeHours, forecast }: SafeHoursProps) {
       )}
 
       {/* Tip */}
-      <div className="mt-4 pt-4 border-t border-border text-xs text-muted-foreground">
-        💡 <span>AQI &gt;200: limit outdoor activity. AQI &gt;300: stay indoors. Wear N95 if AQI &gt;150.</span>
+      <div className="border-border text-muted-foreground mt-4 border-t pt-4 text-xs">
+        💡{' '}
+        <span>
+          AQI &gt;200: limit outdoor activity. AQI &gt;300: stay indoors. Wear
+          N95 if AQI &gt;150.
+        </span>
       </div>
     </div>
   );

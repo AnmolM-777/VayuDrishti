@@ -16,7 +16,10 @@ export default function PredictionsPage() {
   useEffect(() => {
     fetch('/api/predictions')
       .then((r) => r.json())
-      .then((data) => { setPrediction(data.prediction ?? null); setLoading(false); })
+      .then((data) => {
+        setPrediction(data.prediction ?? null);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -29,56 +32,90 @@ export default function PredictionsPage() {
 
       {loading ? (
         <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl h-64 animate-pulse" />
-          <div className="bg-card border border-border rounded-xl h-40 animate-pulse" />
-          <div className="bg-card border border-border rounded-xl h-48 animate-pulse" />
+          <div className="bg-card border-border h-64 animate-pulse rounded-xl border" />
+          <div className="bg-card border-border h-40 animate-pulse rounded-xl border" />
+          <div className="bg-card border-border h-48 animate-pulse rounded-xl border" />
         </div>
       ) : !prediction ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <TrendingUp className="size-12 text-muted-foreground mb-3" />
+          <TrendingUp className="text-muted-foreground mb-3 size-12" />
           <p className="font-medium">Prediction data unavailable</p>
-          <p className="text-sm text-muted-foreground mt-1">The prediction engine is warming up. Try again shortly.</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            The prediction engine is warming up. Try again shortly.
+          </p>
         </div>
       ) : (
         <>
           <ForecastChart prediction={prediction} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <SafeHours safeHours={prediction.safeHours} forecast={prediction.forecast} />
-            <div className="bg-card border border-border rounded-xl p-5 space-y-3">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <SafeHours
+              safeHours={prediction.safeHours}
+              forecast={prediction.forecast}
+            />
+            <div className="bg-card border-border space-y-3 rounded-xl border p-5">
               <h3 className="font-semibold">Prediction Factors</h3>
               {prediction.forecast.slice(0, 1).map((f) => (
                 <div key={f.hour} className="space-y-2.5">
                   {[
-                    { label: 'Historical Baseline', value: f.factors.historical, desc: 'Based on past 30-day patterns' },
-                    { label: 'Weather Impact', value: f.factors.weather, desc: 'Temperature, humidity, wind' },
-                    { label: 'Wind Dispersal', value: f.factors.wind, desc: 'Pollutant dilution via wind' },
-                    { label: 'Special Events', value: f.factors.events, desc: 'Local events & industrial activity' },
+                    {
+                      label: 'Historical Baseline',
+                      value: f.factors.historical,
+                      desc: 'Based on past 30-day patterns',
+                    },
+                    {
+                      label: 'Weather Impact',
+                      value: f.factors.weather,
+                      desc: 'Temperature, humidity, wind',
+                    },
+                    {
+                      label: 'Wind Dispersal',
+                      value: f.factors.wind,
+                      desc: 'Pollutant dilution via wind',
+                    },
+                    {
+                      label: 'Special Events',
+                      value: f.factors.events,
+                      desc: 'Local events & industrial activity',
+                    },
                   ].map(({ label, value, desc }) => (
                     <div key={label}>
-                      <div className="flex justify-between text-xs mb-1">
+                      <div className="mb-1 flex justify-between text-xs">
                         <span className="font-medium">{label}</span>
-                        <span className={value >= 0 ? 'text-red-400' : 'text-emerald-400'}>
-                          {value >= 0 ? '+' : ''}{(value * 100).toFixed(0)}%
+                        <span
+                          className={
+                            value >= 0 ? 'text-red-400' : 'text-emerald-400'
+                          }
+                        >
+                          {value >= 0 ? '+' : ''}
+                          {(value * 100).toFixed(0)}%
                         </span>
                       </div>
-                      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                      <div className="bg-secondary h-1.5 overflow-hidden rounded-full">
                         <div
                           className="h-full rounded-full"
                           style={{
                             width: `${Math.abs(value) * 100}%`,
                             backgroundColor: value >= 0 ? '#f97316' : '#22c55e',
-                            marginLeft: value < 0 ? `${(1 - Math.abs(value)) * 100}%` : undefined,
+                            marginLeft:
+                              value < 0
+                                ? `${(1 - Math.abs(value)) * 100}%`
+                                : undefined,
                           }}
                         />
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{desc}</p>
+                      <p className="text-muted-foreground mt-0.5 text-[10px]">
+                        {desc}
+                      </p>
                     </div>
                   ))}
                 </div>
               ))}
             </div>
           </div>
-          <HourlyBreakdown forecast={prediction.forecast} currentHour={currentHour} />
+          <HourlyBreakdown
+            forecast={prediction.forecast}
+            currentHour={currentHour}
+          />
         </>
       )}
     </div>
