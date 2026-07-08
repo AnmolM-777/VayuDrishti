@@ -35,7 +35,11 @@ function formatHour(hour: number): string {
 }
 
 // Custom dot that changes color based on AQI level
-function CustomDot(props: { cx?: number; cy?: number; payload?: { predictedAqi: number } }) {
+function CustomDot(props: {
+  cx?: number;
+  cy?: number;
+  payload?: { predictedAqi: number };
+}) {
   const { cx, cy, payload } = props;
   if (!cx || !cy || !payload) return null;
   const color = getAqiColor(payload.predictedAqi);
@@ -58,12 +62,16 @@ function CustomTooltip({
   const aqi = item.value;
   const color = getAqiColor(aqi);
   return (
-    <div className="bg-popover border border-border rounded-lg px-3 py-2 text-xs shadow-lg">
-      <p className="text-muted-foreground mb-1">{label !== undefined ? `${formatHour(label)} today` : ''}</p>
-      <p className="font-bold text-sm" style={{ color }}>
+    <div className="bg-popover border-border rounded-lg border px-3 py-2 text-xs shadow-lg">
+      <p className="text-muted-foreground mb-1">
+        {label !== undefined ? `${formatHour(label)} today` : ''}
+      </p>
+      <p className="text-sm font-bold" style={{ color }}>
         AQI {aqi}
       </p>
-      <p className="text-muted-foreground capitalize">{item.payload.category.replace('_', ' ')}</p>
+      <p className="text-muted-foreground capitalize">
+        {item.payload.category.replace('_', ' ')}
+      </p>
     </div>
   );
 }
@@ -86,16 +94,18 @@ export function AqiTrendChart({ prediction }: AqiTrendChartProps) {
   }));
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 sm:p-5">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-card border-border rounded-xl border p-4 sm:p-5">
+      <div className="mb-4 flex items-start justify-between">
         <div>
-          <h3 className="font-semibold text-sm">24-Hour AQI Forecast</h3>
-          <p className="text-muted-foreground text-xs mt-0.5">{prediction.areaName} • Updates hourly</p>
+          <h3 className="text-sm font-semibold">24-Hour AQI Forecast</h3>
+          <p className="text-muted-foreground mt-0.5 text-xs">
+            {prediction.areaName} • Updates hourly
+          </p>
         </div>
         <div className="flex items-center gap-1.5 text-xs">
           <span
             className={cn(
-              'px-2 py-0.5 rounded-full font-medium',
+              'rounded-full px-2 py-0.5 font-medium',
               prediction.trend === 'worsening'
                 ? 'bg-red-500/10 text-red-400'
                 : prediction.trend === 'improving'
@@ -103,7 +113,11 @@ export function AqiTrendChart({ prediction }: AqiTrendChartProps) {
                   : 'bg-amber-500/10 text-amber-400',
             )}
           >
-            {prediction.trend === 'worsening' ? '↑ Worsening' : prediction.trend === 'improving' ? '↓ Improving' : '→ Stable'}
+            {prediction.trend === 'worsening'
+              ? '↑ Worsening'
+              : prediction.trend === 'improving'
+                ? '↓ Improving'
+                : '→ Stable'}
           </span>
         </div>
       </div>
@@ -116,14 +130,22 @@ export function AqiTrendChart({ prediction }: AqiTrendChartProps) {
         style={{ height: 180 }}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 0, left: -20 }}>
+          <AreaChart
+            data={data}
+            margin={{ top: 5, right: 5, bottom: 0, left: -20 }}
+          >
             <defs>
               <linearGradient id="aqiGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="hsl(var(--border))"
+              strokeOpacity={0.5}
+              vertical={false}
+            />
             <XAxis
               dataKey="hour"
               tickFormatter={formatHour}
@@ -141,9 +163,24 @@ export function AqiTrendChart({ prediction }: AqiTrendChartProps) {
             />
             <Tooltip content={<CustomTooltip />} />
             {/* AQI threshold lines */}
-            <ReferenceLine y={100} stroke="#84cc16" strokeDasharray="3 3" strokeOpacity={0.5} />
-            <ReferenceLine y={200} stroke="#f59e0b" strokeDasharray="3 3" strokeOpacity={0.5} />
-            <ReferenceLine y={300} stroke="#f97316" strokeDasharray="3 3" strokeOpacity={0.5} />
+            <ReferenceLine
+              y={100}
+              stroke="#84cc16"
+              strokeDasharray="3 3"
+              strokeOpacity={0.5}
+            />
+            <ReferenceLine
+              y={200}
+              stroke="#f59e0b"
+              strokeDasharray="3 3"
+              strokeOpacity={0.5}
+            />
+            <ReferenceLine
+              y={300}
+              stroke="#f97316"
+              strokeDasharray="3 3"
+              strokeOpacity={0.5}
+            />
             <Area
               type="monotone"
               dataKey="predictedAqi"
@@ -160,25 +197,34 @@ export function AqiTrendChart({ prediction }: AqiTrendChartProps) {
       </div>
 
       {/* Peak + Safe window summary */}
-      <div className="flex gap-3 mt-4 pt-4 border-t border-border">
+      <div className="border-border mt-4 flex gap-3 border-t pt-4">
         <div className="flex-1 text-center">
-          <p className="text-xs text-muted-foreground">Peak AQI</p>
+          <p className="text-muted-foreground text-xs">Peak AQI</p>
           <p className="text-lg font-bold text-red-400">{prediction.peakAqi}</p>
-          <p className="text-xs text-muted-foreground">{formatHour(prediction.peakHour)}</p>
+          <p className="text-muted-foreground text-xs">
+            {formatHour(prediction.peakHour)}
+          </p>
         </div>
-        <div className="w-px bg-border" />
+        <div className="bg-border w-px" />
         <div className="flex-1 text-center">
-          <p className="text-xs text-muted-foreground">Safe Hours</p>
-          <p className="text-lg font-bold text-emerald-400">{prediction.safeHours.length}h</p>
-          <p className="text-xs text-muted-foreground">today</p>
+          <p className="text-muted-foreground text-xs">Safe Hours</p>
+          <p className="text-lg font-bold text-emerald-400">
+            {prediction.safeHours.length}h
+          </p>
+          <p className="text-muted-foreground text-xs">today</p>
         </div>
-        <div className="w-px bg-border" />
+        <div className="bg-border w-px" />
         <div className="flex-1 text-center">
-          <p className="text-xs text-muted-foreground">Current</p>
-          <p className="text-lg font-bold" style={{ color: getAqiColor(prediction.currentAqi) }}>
+          <p className="text-muted-foreground text-xs">Current</p>
+          <p
+            className="text-lg font-bold"
+            style={{ color: getAqiColor(prediction.currentAqi) }}
+          >
             {prediction.currentAqi}
           </p>
-          <p className="text-xs text-muted-foreground capitalize">{prediction.currentCategory.replace('_', ' ')}</p>
+          <p className="text-muted-foreground text-xs capitalize">
+            {prediction.currentCategory.replace('_', ' ')}
+          </p>
         </div>
       </div>
     </div>

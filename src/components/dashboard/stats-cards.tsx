@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Wind, Flame, FileText, CheckCircle2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import {
+  Wind,
+  Flame,
+  FileText,
+  CheckCircle2,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DashboardStats {
@@ -16,13 +24,53 @@ interface StatsCardsProps {
   stats: DashboardStats;
 }
 
-function getAqiCategory(aqi: number): { label: string; color: string; bg: string; textColor: string } {
-  if (aqi <= 50) return { label: 'Good', color: '#22c55e', bg: 'bg-emerald-500/10', textColor: 'text-emerald-400' };
-  if (aqi <= 100) return { label: 'Satisfactory', color: '#84cc16', bg: 'bg-lime-500/10', textColor: 'text-lime-400' };
-  if (aqi <= 200) return { label: 'Moderate', color: '#f59e0b', bg: 'bg-amber-500/10', textColor: 'text-amber-400' };
-  if (aqi <= 300) return { label: 'Poor', color: '#f97316', bg: 'bg-orange-500/10', textColor: 'text-orange-400' };
-  if (aqi <= 400) return { label: 'Very Poor', color: '#ef4444', bg: 'bg-red-500/10', textColor: 'text-red-400' };
-  return { label: 'Severe', color: '#8b5cf6', bg: 'bg-purple-500/10', textColor: 'text-purple-400' };
+function getAqiCategory(aqi: number): {
+  label: string;
+  color: string;
+  bg: string;
+  textColor: string;
+} {
+  if (aqi <= 50)
+    return {
+      label: 'Good',
+      color: '#22c55e',
+      bg: 'bg-emerald-500/10',
+      textColor: 'text-emerald-400',
+    };
+  if (aqi <= 100)
+    return {
+      label: 'Satisfactory',
+      color: '#84cc16',
+      bg: 'bg-lime-500/10',
+      textColor: 'text-lime-400',
+    };
+  if (aqi <= 200)
+    return {
+      label: 'Moderate',
+      color: '#f59e0b',
+      bg: 'bg-amber-500/10',
+      textColor: 'text-amber-400',
+    };
+  if (aqi <= 300)
+    return {
+      label: 'Poor',
+      color: '#f97316',
+      bg: 'bg-orange-500/10',
+      textColor: 'text-orange-400',
+    };
+  if (aqi <= 400)
+    return {
+      label: 'Very Poor',
+      color: '#ef4444',
+      bg: 'bg-red-500/10',
+      textColor: 'text-red-400',
+    };
+  return {
+    label: 'Severe',
+    color: '#8b5cf6',
+    bg: 'bg-purple-500/10',
+    textColor: 'text-purple-400',
+  };
 }
 
 function AqiGauge({ aqi }: { aqi: number }) {
@@ -53,7 +101,12 @@ function AqiGauge({ aqi }: { aqi: number }) {
 
   return (
     <div className="relative flex flex-col items-center">
-      <svg width="100" height="60" viewBox="0 0 100 60" className="overflow-visible">
+      <svg
+        width="100"
+        height="60"
+        viewBox="0 0 100 60"
+        className="overflow-visible"
+      >
         {/* Background arc */}
         <path
           d="M 10 50 A 40 40 0 0 1 90 50"
@@ -76,8 +129,12 @@ function AqiGauge({ aqi }: { aqi: number }) {
         />
       </svg>
       <div className="absolute bottom-0 text-center">
-        <div className="text-2xl font-bold font-mono tabular-nums">{displayAqi}</div>
-        <div className={cn('text-xs font-medium mt-0.5', category.textColor)}>{category.label}</div>
+        <div className="font-mono text-2xl font-bold tabular-nums">
+          {displayAqi}
+        </div>
+        <div className={cn('mt-0.5 text-xs font-medium', category.textColor)}>
+          {category.label}
+        </div>
       </div>
     </div>
   );
@@ -93,31 +150,47 @@ interface StatCardProps {
   children?: React.ReactNode;
 }
 
-function StatCard({ title, value, icon, iconBg, trend, trendLabel, children }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  icon,
+  iconBg,
+  trend,
+  trendLabel,
+  children,
+}: StatCardProps) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
     return () => clearTimeout(t);
   }, []);
 
-  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
-  const trendColor = trend === 'up' ? 'text-red-400' : trend === 'down' ? 'text-emerald-400' : 'text-muted-foreground';
+  const TrendIcon =
+    trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+  const trendColor =
+    trend === 'up'
+      ? 'text-red-400'
+      : trend === 'down'
+        ? 'text-emerald-400'
+        : 'text-muted-foreground';
 
   return (
     <div
       className={cn(
-        'bg-card border border-border rounded-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-500',
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4',
+        'bg-card border-border flex flex-col gap-3 rounded-xl border p-4 transition-all duration-500 sm:p-5',
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
       )}
     >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">{title}</p>
+          <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+            {title}
+          </p>
           {children ?? (
-            <p className="text-3xl font-bold mt-1 tabular-nums">{value}</p>
+            <p className="mt-1 text-3xl font-bold tabular-nums">{value}</p>
           )}
         </div>
-        <div className={cn('p-2.5 rounded-lg', iconBg)}>{icon}</div>
+        <div className={cn('rounded-lg p-2.5', iconBg)}>{icon}</div>
       </div>
       {trendLabel && (
         <div className={cn('flex items-center gap-1 text-xs', trendColor)}>
@@ -133,7 +206,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
   const aqiCategory = getAqiCategory(stats.avgCityAqi);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {/* AQI Gauge */}
       <StatCard
         title="City AQI"
