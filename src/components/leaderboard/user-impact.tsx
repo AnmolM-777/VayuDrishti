@@ -41,18 +41,25 @@ export function UserImpact({ user, rank }: UserImpactProps) {
   ];
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5">
-      <div className="flex items-center gap-3 mb-5">
+    <div className="bg-card border-border rounded-xl border p-5">
+      <div className="mb-5 flex items-center gap-3">
         {/* Avatar */}
         <div
-          className="size-12 rounded-full flex items-center justify-center text-lg font-bold"
-          style={{ backgroundColor: `${levelCfg.color}22`, color: levelCfg.color }}
+          className="flex size-12 items-center justify-center rounded-full text-lg font-bold"
+          style={{
+            backgroundColor: `${levelCfg.color}22`,
+            color: levelCfg.color,
+          }}
         >
-          {user.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+          {user.displayName
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .slice(0, 2)}
         </div>
         <div>
           <p className="font-semibold">{user.displayName}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {levelCfg.emoji} {levelCfg.label} · Rank #{rank}
           </p>
         </div>
@@ -60,30 +67,44 @@ export function UserImpact({ user, rank }: UserImpactProps) {
 
       <div className="grid grid-cols-2 gap-3">
         {stats.map(({ icon: Icon, label, value, verified, color }) => (
-          <div key={label} className="p-3 rounded-lg bg-secondary border border-border">
-            <Icon className="size-4 mb-2" style={{ color }} />
-            <p className="text-xl font-bold" style={{ color }}>{value}</p>
-            <p className="text-xs text-muted-foreground">{label}</p>
+          <div
+            key={label}
+            className="bg-secondary border-border rounded-lg border p-3"
+          >
+            <Icon className="mb-2 size-4" style={{ color }} />
+            <p className="text-xl font-bold" style={{ color }}>
+              {value}
+            </p>
+            <p className="text-muted-foreground text-xs">{label}</p>
             {verified !== undefined && (
-              <p className="text-[10px] text-muted-foreground mt-0.5">{verified} verified</p>
+              <p className="text-muted-foreground mt-0.5 text-[10px]">
+                {verified} verified
+              </p>
             )}
           </div>
         ))}
       </div>
 
       {/* Trust score bar */}
-      <div className="mt-4 pt-4 border-t border-border">
-        <div className="flex items-center justify-between text-xs mb-1.5">
+      <div className="border-border mt-4 border-t pt-4">
+        <div className="mb-1.5 flex items-center justify-between text-xs">
           <span className="text-muted-foreground">Trust Score</span>
-          <span className="font-bold" style={{ color: levelCfg.color }}>{user.trustScore}/100</span>
+          <span className="font-bold" style={{ color: levelCfg.color }}>
+            {user.trustScore}/100
+          </span>
         </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden">
+        <div className="bg-secondary h-2 overflow-hidden rounded-full">
           <div
             className="h-full rounded-full transition-all duration-700"
-            style={{ width: `${user.trustScore}%`, backgroundColor: levelCfg.color }}
+            style={{
+              width: `${user.trustScore}%`,
+              backgroundColor: levelCfg.color,
+            }}
           />
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1">{levelCfg.perks}</p>
+        <p className="text-muted-foreground mt-1 text-[10px]">
+          {levelCfg.perks}
+        </p>
       </div>
     </div>
   );

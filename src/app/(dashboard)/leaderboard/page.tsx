@@ -37,16 +37,19 @@ export default function LeaderboardPage() {
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="bg-card border border-border rounded-xl h-16 animate-pulse" />
+            <div
+              key={i}
+              className="bg-card border-border h-16 animate-pulse rounded-xl border"
+            />
           ))}
         </div>
       ) : users.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Trophy className="size-12 text-muted-foreground mb-3" />
+          <Trophy className="text-muted-foreground mb-3 size-12" />
           <p className="font-medium">No leaderboard data available</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {/* Main leaderboard */}
           <div className="xl:col-span-2">
             <LeaderboardTable users={users} />
