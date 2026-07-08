@@ -27,14 +27,22 @@ const SOURCE_OPTIONS = Object.entries(SOURCE_TYPE_CONFIG).map(([key, cfg]) => ({
   color: cfg.color,
 }));
 
-function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+function Toggle({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+}) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer text-xs">
+    <label className="flex cursor-pointer items-center gap-2 text-xs">
       <div
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative w-8 h-4 rounded-full transition-colors',
-          checked ? 'bg-primary' : 'bg-secondary border border-border',
+          'relative h-4 w-8 rounded-full transition-colors',
+          checked ? 'bg-primary' : 'bg-secondary border-border border',
         )}
       >
         <div
@@ -54,7 +62,8 @@ export function MapControls({ filters, onChange }: MapControlsProps) {
 
   function toggleSource(src: PollutionSourceType) {
     const set = new Set(filters.sourceTypes);
-    if (set.has(src)) set.delete(src); else set.add(src);
+    if (set.has(src)) set.delete(src);
+    else set.add(src);
     onChange({ ...filters, sourceTypes: Array.from(set) });
   }
 
@@ -62,36 +71,59 @@ export function MapControls({ filters, onChange }: MapControlsProps) {
     <div className="absolute top-4 left-4 z-10 space-y-2">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 px-3 py-2 bg-card/95 backdrop-blur-md border border-border rounded-lg text-xs font-medium shadow-lg hover:bg-card transition-colors"
+        className="bg-card/95 border-border hover:bg-card flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium shadow-lg backdrop-blur-md transition-colors"
       >
         <Layers className="size-3.5" />
         Layers & Filters
       </button>
 
       {expanded && (
-        <div className="bg-card/95 backdrop-blur-md border border-border rounded-xl p-4 space-y-4 shadow-xl w-56">
+        <div className="bg-card/95 border-border w-56 space-y-4 rounded-xl border p-4 shadow-xl backdrop-blur-md">
           {/* Layer toggles */}
           <div>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Layers</p>
+            <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-wider uppercase">
+              Layers
+            </p>
             <div className="space-y-2">
-              <Toggle checked={filters.showHeatmap} onChange={(v) => onChange({ ...filters, showHeatmap: v })} label="Heatmap" />
-              <Toggle checked={filters.showHotspots} onChange={(v) => onChange({ ...filters, showHotspots: v })} label="Hotspots" />
-              <Toggle checked={filters.showStations} onChange={(v) => onChange({ ...filters, showStations: v })} label="CPCB Stations" />
-              <Toggle checked={filters.showReports} onChange={(v) => onChange({ ...filters, showReports: v })} label="Citizen Reports" />
+              <Toggle
+                checked={filters.showHeatmap}
+                onChange={(v) => onChange({ ...filters, showHeatmap: v })}
+                label="Heatmap"
+              />
+              <Toggle
+                checked={filters.showHotspots}
+                onChange={(v) => onChange({ ...filters, showHotspots: v })}
+                label="Hotspots"
+              />
+              <Toggle
+                checked={filters.showStations}
+                onChange={(v) => onChange({ ...filters, showStations: v })}
+                label="CPCB Stations"
+              />
+              <Toggle
+                checked={filters.showReports}
+                onChange={(v) => onChange({ ...filters, showReports: v })}
+                label="Citizen Reports"
+              />
             </div>
           </div>
 
           {/* Source type filter */}
           <div>
-            <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-2">Source Types</p>
+            <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-wider uppercase">
+              Source Types
+            </p>
             <div className="space-y-1.5">
               {SOURCE_OPTIONS.map((opt) => (
-                <label key={opt.value} className="flex items-center gap-2 cursor-pointer text-xs">
+                <label
+                  key={opt.value}
+                  className="flex cursor-pointer items-center gap-2 text-xs"
+                >
                   <input
                     type="checkbox"
                     checked={filters.sourceTypes.includes(opt.value)}
                     onChange={() => toggleSource(opt.value)}
-                    className="rounded border-border"
+                    className="border-border rounded"
                   />
                   <span>{opt.emoji}</span>
                   <span>{opt.label}</span>

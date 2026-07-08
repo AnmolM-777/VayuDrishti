@@ -13,7 +13,9 @@ export function loadGoogleMaps(): Promise<void> {
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (!apiKey || apiKey === 'your_google_maps_api_key_here') {
-    return Promise.reject(new Error('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not configured'));
+    return Promise.reject(
+      new Error('NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not configured'),
+    );
   }
 
   if (loaderPromise) return loaderPromise;
@@ -26,7 +28,8 @@ export function loadGoogleMaps(): Promise<void> {
     }
 
     const callbackName = `__gmaps_cb_${Date.now()}`;
-    (window as unknown as Record<string, unknown>)[callbackName] = () => resolve();
+    (window as unknown as Record<string, unknown>)[callbackName] = () =>
+      resolve();
 
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=visualization&callback=${callbackName}`;
