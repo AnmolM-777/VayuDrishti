@@ -11,17 +11,34 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server';
+
+import {
+  ApiError,
+  handleApiError,
+  ok,
+  requestId,
+  withTimeout,
+} from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
 import type { StationsResponse } from '@/types/station';
 
 // In-memory cache to avoid hammering APIs
 let cache: { data: StationsResponse; expiresAt: number } | null = null;
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+const SOURCE_TIMEOUT_MS = 10_000;
 
-export async function GET(_request: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+  const id = requestId();
+  const context = { route: '/api/stations', requestId: id };
+
   try {
+    await requireApiUser(request);
+
     // Serve from cache if fresh
     if (cache && Date.now() < cache.expiresAt) {
-      return NextResponse.json(cache.data);
+      return ok(cache.data, { headers: { 'X-Data-Source': 'cache' } });
     }
 
     let stations = null;
@@ -31,15 +48,22 @@ export async function GET(_request: NextRequest) {
     const googleKey = process.env.GOOGLE_MAPS_API_KEY;
     if (googleKey && googleKey !== 'your_google_maps_api_key_here') {
       try {
-        const { fetchDelhiStationsViaGoogleAQ } = await import('@/lib/google-air-quality');
-        const googleStations = await fetchDelhiStationsViaGoogleAQ();
+        const { fetchDelhiStationsViaGoogleAQ } =
+          await import('@/lib/google-air-quality');
+        const googleStations = await withTimeout(
+          fetchDelhiStationsViaGoogleAQ(),
+          SOURCE_TIMEOUT_MS,
+          'Google Air Quality station fetch',
+        );
         if (googleStations.length > 0) {
           stations = googleStations;
           source = 'google_aq';
-          // console.log(`[/api/stations] ✓ Google AQ: ${googleStations.length} stations`);
         }
       } catch (err) {
-        console.warn('[/api/stations] Google AQ failed:', err instanceof Error ? err.message : err);
+        console.warn(
+          '[/api/stations] Google AQ failed:',
+          err instanceof Error ? err.message : err,
+        );
       }
     }
 
@@ -48,15 +72,22 @@ export async function GET(_request: NextRequest) {
       const openaqKey = process.env.OPENAQ_API_KEY;
       if (openaqKey && openaqKey !== 'your_openaq_api_key_here') {
         try {
-          const { fetchDelhiStationsWithReadings } = await import('@/lib/openaq');
-          const openaqStations = await fetchDelhiStationsWithReadings();
+          const { fetchDelhiStationsWithReadings } =
+            await import('@/lib/openaq');
+          const openaqStations = await withTimeout(
+            fetchDelhiStationsWithReadings(),
+            SOURCE_TIMEOUT_MS,
+            'OpenAQ station fetch',
+          );
           if (openaqStations.length > 0) {
             stations = openaqStations;
             source = 'openaq';
-            // console.log(`[/api/stations] ✓ OpenAQ: ${openaqStations.length} stations`);
           }
         } catch (err) {
-          console.warn('[/api/stations] OpenAQ failed:', err instanceof Error ? err.message : err);
+          console.warn(
+            '[/api/stations] OpenAQ failed:',
+            err instanceof Error ? err.message : err,
+          );
         }
       }
     }
@@ -66,7 +97,6 @@ export async function GET(_request: NextRequest) {
       const { getSampleStations } = await import('@/lib/sample-data');
       stations = getSampleStations();
       source = 'sample';
-      // console.log(`[/api/stations] ↩ Using sample data (${stations.length} stations)`);
     }
 
     const response: StationsResponse = {
@@ -81,9 +111,13 @@ export async function GET(_request: NextRequest) {
 
     cache = { data: response, expiresAt: Date.now() + CACHE_TTL_MS };
     return nextResponse;
-
   } catch (error) {
-    console.error('[/api/stations] Unhandled error:', error);
+    if (
+      error instanceof ApiError &&
+      ['auth_required', 'auth_unavailable', 'forbidden'].includes(error.code)
+    ) {
+      return handleApiError(error, context);
+    }
 
     // Last-resort fallback
     try {
@@ -102,5 +136,3 @@ export async function GET(_request: NextRequest) {
     }
   }
 }
-
-export const revalidate = 60;
