@@ -4,21 +4,21 @@
  * Returns aggregated dashboard statistics.
  */
 
-import { NextResponse } from 'next/server';
-
+import { handleApiError, ok, requestId } from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
 import { getSampleStats } from '@/lib/sample-data';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
+  const id = requestId();
+  const context = { route: '/api/stats', requestId: id };
+
   try {
+    await requireApiUser(request);
     const stats = getSampleStats();
-    return NextResponse.json({ success: true, ...stats });
+    return ok({ success: true, ...stats });
   } catch (error) {
-    console.error('[/api/stats] Error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch stats' },
-      { status: 500 },
-    );
+    return handleApiError(error, context);
   }
 }
-
-export const revalidate = 60;
