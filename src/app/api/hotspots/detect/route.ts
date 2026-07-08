@@ -12,29 +12,35 @@
  *   { success, hotspotsCreated, hotspotsUpdated, hotspots[] }
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 
 import { detectHotspots } from '@/lib/clustering';
-import { getSampleReports } from '@/lib/sample-data';
-import type { DetectHotspotsRequest, DetectHotspotsResponse } from '@/types/hotspot';
+import { handleApiError, ok, requestId } from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
+import { getReports, upsertHotspots } from '@/lib/server/repositories';
+import { detectHotspotsRequestSchema } from '@/lib/server/validation';
+import type { DetectHotspotsResponse } from '@/types/hotspot';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const id = requestId();
+  const context = { route: '/api/hotspots/detect', requestId: id };
+
   try {
-    const body = (await request.json().catch(() => ({}))) as DetectHotspotsRequest;
-
-    const windowHours = body.windowHours ?? 2;
-    const minReports = body.minReports ?? 2;
-    const radiusMeters = body.radiusMeters ?? 500;
-
-    // In production, fetch from Firestore.
-    // For hackathon demo, use sample data + any stored reports.
-    const reports = getSampleReports();
-
+    await requireApiUser(request, ['municipal', 'reviewer']);
+    const body = await request
+      .clone()
+      .json()
+      .catch(() => ({}));
+    const parsed = detectHotspotsRequestSchema.parse(body);
+    const reports = await getReports();
     const hotspots = detectHotspots(reports, {
-      radiusMeters,
-      minReports,
-      windowMs: windowHours * 60 * 60 * 1000,
+      radiusMeters: parsed.radiusMeters,
+      minReports: parsed.minReports,
+      windowMs: parsed.windowHours * 60 * 60 * 1000,
     });
+    await upsertHotspots(hotspots);
 
     const response: DetectHotspotsResponse = {
       success: true,
@@ -43,18 +49,8 @@ export async function POST(request: NextRequest) {
       hotspots,
     };
 
-    return NextResponse.json(response);
+    return ok(response);
   } catch (error) {
-    console.error('[/api/hotspots/detect] Error:', error);
-    return NextResponse.json<DetectHotspotsResponse>(
-      {
-        success: false,
-        hotspotsCreated: 0,
-        hotspotsUpdated: 0,
-        hotspots: [],
-        error: error instanceof Error ? error.message : 'Hotspot detection failed',
-      },
-      { status: 500 },
-    );
+    return handleApiError(error, context);
   }
 }
