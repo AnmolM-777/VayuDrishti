@@ -5,36 +5,67 @@
  * Query params: ?status=pending&sourceType=garbage_burning (optional filters)
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 
-import { getSampleReports } from '@/lib/sample-data';
-import type { PollutionReport, ReportStatus, PollutionSourceType } from '@/types/report';
+import {
+  handleApiError,
+  ok,
+  parseJson,
+  parseSearchParams,
+  requestId,
+} from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
+import { createReport, getReports } from '@/lib/server/repositories';
+import {
+  createReportRequestSchema,
+  reportsQuerySchema,
+} from '@/lib/server/validation';
+import type { PollutionFingerprint, PollutionReport } from '@/types/report';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const id = requestId();
+  const context = { route: '/api/reports', requestId: id };
+
   try {
-    const status = request.nextUrl.searchParams.get('status') as ReportStatus | null;
-    const sourceType = request.nextUrl.searchParams.get('sourceType') as PollutionSourceType | null;
-
-    let reports: PollutionReport[] = getSampleReports();
-
-    if (status) {
-      reports = reports.filter((r) => r.status === status);
-    }
-    if (sourceType) {
-      reports = reports.filter((r) => r.aiAnalysis?.sourceType === sourceType);
-    }
-
-    // Sort by timestamp (newest first)
-    reports.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-    return NextResponse.json({ success: true, reports });
-  } catch (error) {
-    console.error('[/api/reports] Error:', error);
-    return NextResponse.json(
-      { success: false, reports: [], error: 'Failed to fetch reports' },
-      { status: 500 },
+    await requireApiUser(request);
+    const filters = parseSearchParams(
+      request.nextUrl.searchParams,
+      reportsQuerySchema,
     );
+    const reports: PollutionReport[] = await getReports(filters);
+
+    return ok({ success: true, reports });
+  } catch (error) {
+    return handleApiError(error, context);
   }
 }
 
+export async function POST(request: NextRequest) {
+  const id = requestId();
+  const context = { route: '/api/reports', requestId: id };
 
+  try {
+    const user = await requireApiUser(request, [
+      'citizen',
+      'municipal',
+      'reviewer',
+    ]);
+    const body = await parseJson(request, createReportRequestSchema);
+    const report = await createReport({
+      userId: user.uid,
+      userName: user.email ?? (user.isDemo ? 'Demo User' : undefined),
+      location: body.location,
+      photoUrl: body.photoUrl ?? '/sample/citizen-upload.jpg',
+      thumbnailUrl: body.thumbnailUrl,
+      description: body.description,
+      aiAnalysis: body.aiAnalysis as PollutionFingerprint | undefined,
+      status: body.aiAnalysis ? 'pending' : 'analyzing',
+    });
+
+    return ok({ success: true, report }, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, context);
+  }
+}
