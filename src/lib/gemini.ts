@@ -5,12 +5,23 @@
  * photos and classify pollution sources with structured JSON output.
  */
 
+import { createHash } from 'crypto';
+
 import { GoogleGenAI } from '@google/genai';
 
+import { retry, withTimeout } from '@/lib/server/api';
+import { pollutionFingerprintSchema } from '@/lib/server/validation';
 import type { PollutionFingerprint } from '@/types/report';
 
 // ─── Client singleton ───────────────────────────────────────────────
 let client: GoogleGenAI | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const GEMINI_TIMEOUT_MS = 25_000;
+const GEMINI_RETRY_ATTEMPTS = 3;
+const analysisCache = new Map<
+  string,
+  { value: PollutionFingerprint; expiresAt: number }
+>();
 
 function getClient(): GoogleGenAI {
   if (client) return client;
@@ -89,7 +100,8 @@ const FINGERPRINT_SCHEMA = {
     pollutants: {
       type: 'array' as const,
       items: { type: 'string' as const },
-      description: 'Likely pollutants being emitted (PM2.5, PM10, SO2, NOx, VOC, CO)',
+      description:
+        'Likely pollutants being emitted (PM2.5, PM10, SO2, NOx, VOC, CO)',
     },
     isNighttime: {
       type: 'boolean' as const,
@@ -126,19 +138,31 @@ interface AnalysisContext {
 }
 
 function buildContextPrompt(context: AnalysisContext): string {
-  const parts: string[] = ['Analyze this citizen-uploaded photo for pollution sources.'];
+  const parts: string[] = [
+    'Analyze this citizen-uploaded photo for pollution sources.',
+  ];
 
   if (context.address) {
     parts.push(`📍 Location: ${context.address}`);
   }
-  if (context.lat && context.lng) {
-    parts.push(`🗺️ Coordinates: ${context.lat.toFixed(4)}, ${context.lng.toFixed(4)}`);
+  if (context.lat != null && context.lng != null) {
+    parts.push(
+      `🗺️ Coordinates: ${context.lat.toFixed(4)}, ${context.lng.toFixed(4)}`,
+    );
   }
   if (context.timestamp) {
     const d = new Date(context.timestamp);
     const hour = d.getHours();
     const timeOfDay =
-      hour < 6 ? 'early morning' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : hour < 20 ? 'evening' : 'night';
+      hour < 6
+        ? 'early morning'
+        : hour < 12
+          ? 'morning'
+          : hour < 17
+            ? 'afternoon'
+            : hour < 20
+              ? 'evening'
+              : 'night';
     parts.push(`🕐 Time: ${d.toLocaleString('en-IN')} (${timeOfDay})`);
   }
   if (context.nearbyStationAqi) {
@@ -151,6 +175,78 @@ function buildContextPrompt(context: AnalysisContext): string {
   return parts.join('\n');
 }
 
+function cacheKey(payload: string, context: AnalysisContext): string {
+  return createHash('sha256')
+    .update(payload)
+    .update(JSON.stringify(context))
+    .digest('hex');
+}
+
+function readCachedAnalysis(key: string): PollutionFingerprint | undefined {
+  const cached = analysisCache.get(key);
+  if (!cached) return undefined;
+  if (Date.now() >= cached.expiresAt) {
+    analysisCache.delete(key);
+    return undefined;
+  }
+  return cached.value;
+}
+
+function cacheAnalysis(
+  key: string,
+  value: PollutionFingerprint,
+): PollutionFingerprint {
+  analysisCache.set(key, { value, expiresAt: Date.now() + CACHE_TTL_MS });
+  return value;
+}
+
+function parseGeminiJson(text: string): unknown {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  const jsonText = fenced?.[1] ?? trimmed;
+
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    const start = jsonText.indexOf('{');
+    const end = jsonText.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+      return JSON.parse(jsonText.slice(start, end + 1));
+    }
+    throw new Error('Gemini returned malformed JSON');
+  }
+}
+
+function normalizeFingerprint(value: unknown): PollutionFingerprint {
+  const raw = value as Partial<PollutionFingerprint>;
+  const normalized = {
+    ...raw,
+    confidence: Math.max(0, Math.min(1, Number(raw.confidence ?? 0))),
+    severity: Math.max(1, Math.min(10, Math.round(Number(raw.severity ?? 1)))),
+    estimatedRadiusMeters: Math.max(
+      10,
+      Math.min(5000, Number(raw.estimatedRadiusMeters ?? 100)),
+    ),
+    pollutants: Array.isArray(raw.pollutants) ? raw.pollutants : [],
+    isNighttime: Boolean(raw.isNighttime),
+  };
+
+  return pollutionFingerprintSchema.parse(normalized) as PollutionFingerprint;
+}
+
+function isRetryableGeminiError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message.toLowerCase() : '';
+  return (
+    message.includes('timeout') ||
+    message.includes('rate') ||
+    message.includes('429') ||
+    message.includes('500') ||
+    message.includes('502') ||
+    message.includes('503') ||
+    message.includes('504')
+  );
+}
+
 // ─── Main analysis function ─────────────────────────────────────────
 export async function analyzePollutionPhoto(
   imageBase64: string,
@@ -158,47 +254,57 @@ export async function analyzePollutionPhoto(
   context: AnalysisContext = {},
 ): Promise<PollutionFingerprint> {
   const ai = getClient();
-
   const contextPrompt = buildContextPrompt(context);
+  const key = cacheKey(`${mimeType}:${imageBase64}`, context);
+  const cached = readCachedAnalysis(key);
+  if (cached) return cached;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            inlineData: {
-              mimeType,
-              data: imageBase64,
+  const parsed = await retry(
+    async () => {
+      const response = await withTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  inlineData: {
+                    mimeType,
+                    data: imageBase64,
+                  },
+                },
+                { text: contextPrompt },
+              ],
             },
+          ],
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            responseMimeType: 'application/json',
+            responseSchema: FINGERPRINT_SCHEMA,
+            temperature: 0.2, // Low temperature for consistent classification
+            maxOutputTokens: 1024,
           },
-          { text: contextPrompt },
-        ],
-      },
-    ],
-    config: {
-      systemInstruction: SYSTEM_PROMPT,
-      responseMimeType: 'application/json',
-      responseSchema: FINGERPRINT_SCHEMA,
-      temperature: 0.2, // Low temperature for consistent classification
-      maxOutputTokens: 1024,
+        }),
+        GEMINI_TIMEOUT_MS,
+        'Gemini image analysis',
+      );
+
+      const text = response.text;
+      if (!text) {
+        throw new Error('Gemini returned empty response');
+      }
+
+      return normalizeFingerprint(parseGeminiJson(text));
     },
-  });
+    {
+      attempts: GEMINI_RETRY_ATTEMPTS,
+      baseDelayMs: 400,
+      shouldRetry: isRetryableGeminiError,
+    },
+  );
 
-  const text = response.text;
-  if (!text) {
-    throw new Error('Gemini returned empty response');
-  }
-
-  const parsed = JSON.parse(text) as PollutionFingerprint;
-
-  // Clamp values to valid ranges
-  parsed.confidence = Math.max(0, Math.min(1, parsed.confidence));
-  parsed.severity = Math.max(1, Math.min(10, Math.round(parsed.severity))) as PollutionFingerprint['severity'];
-  parsed.estimatedRadiusMeters = Math.max(10, Math.min(5000, parsed.estimatedRadiusMeters));
-
-  return parsed;
+  return cacheAnalysis(key, parsed);
 }
 
 // ─── URL-based analysis (for photos already in Cloud Storage) ───────
@@ -208,41 +314,54 @@ export async function analyzePollutionPhotoFromUrl(
 ): Promise<PollutionFingerprint> {
   const ai = getClient();
   const contextPrompt = buildContextPrompt(context);
+  const key = cacheKey(imageUrl, context);
+  const cached = readCachedAnalysis(key);
+  if (cached) return cached;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            fileData: {
-              mimeType: 'image/jpeg',
-              fileUri: imageUrl,
+  const parsed = await retry(
+    async () => {
+      const response = await withTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  fileData: {
+                    mimeType: 'image/jpeg',
+                    fileUri: imageUrl,
+                  },
+                },
+                { text: contextPrompt },
+              ],
             },
+          ],
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            responseMimeType: 'application/json',
+            responseSchema: FINGERPRINT_SCHEMA,
+            temperature: 0.2,
+            maxOutputTokens: 1024,
           },
-          { text: contextPrompt },
-        ],
-      },
-    ],
-    config: {
-      systemInstruction: SYSTEM_PROMPT,
-      responseMimeType: 'application/json',
-      responseSchema: FINGERPRINT_SCHEMA,
-      temperature: 0.2,
-      maxOutputTokens: 1024,
+        }),
+        GEMINI_TIMEOUT_MS,
+        'Gemini URL analysis',
+      );
+
+      const text = response.text;
+      if (!text) {
+        throw new Error('Gemini returned empty response');
+      }
+
+      return normalizeFingerprint(parseGeminiJson(text));
     },
-  });
+    {
+      attempts: GEMINI_RETRY_ATTEMPTS,
+      baseDelayMs: 400,
+      shouldRetry: isRetryableGeminiError,
+    },
+  );
 
-  const text = response.text;
-  if (!text) {
-    throw new Error('Gemini returned empty response');
-  }
-
-  const parsed = JSON.parse(text) as PollutionFingerprint;
-  parsed.confidence = Math.max(0, Math.min(1, parsed.confidence));
-  parsed.severity = Math.max(1, Math.min(10, Math.round(parsed.severity))) as PollutionFingerprint['severity'];
-  parsed.estimatedRadiusMeters = Math.max(10, Math.min(5000, parsed.estimatedRadiusMeters));
-
-  return parsed;
+  return cacheAnalysis(key, parsed);
 }
