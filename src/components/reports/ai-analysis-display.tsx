@@ -5,7 +5,6 @@ import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import type { PollutionFingerprint } from '@/types/report';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
 
-
 interface AiAnalysisDisplayProps {
   status: 'idle' | 'scanning' | 'complete' | 'error';
   fingerprint?: PollutionFingerprint;
@@ -32,34 +31,43 @@ function ScanningAnimation() {
     const progTimer = setInterval(() => {
       setProgress((p) => Math.min(p + 2, 95));
     }, 100);
-    return () => { clearInterval(msgTimer); clearInterval(progTimer); };
+    return () => {
+      clearInterval(msgTimer);
+      clearInterval(progTimer);
+    };
   }, []);
 
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 space-y-4">
+    <div className="bg-primary/5 border-primary/20 space-y-4 rounded-xl border p-5">
       <div className="flex items-center gap-3">
         <div className="relative size-10">
-          <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" />
-          <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <Loader2 className="size-5 text-primary animate-spin" />
+          <div className="border-primary/20 absolute inset-0 animate-ping rounded-full border-2" />
+          <div className="bg-primary/10 flex size-10 items-center justify-center rounded-full">
+            <Loader2 className="text-primary size-5 animate-spin" />
           </div>
         </div>
         <div>
-          <p className="font-semibold text-sm text-primary">AI Analysis Running</p>
-          <p className="text-xs text-muted-foreground">Gemini 2.5 Flash · Environmental Forensics</p>
+          <p className="text-primary text-sm font-semibold">
+            AI Analysis Running
+          </p>
+          <p className="text-muted-foreground text-xs">
+            Gemini 2.5 Flash · Environmental Forensics
+          </p>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+      <div className="bg-secondary h-1.5 overflow-hidden rounded-full">
         <div
-          className="h-full bg-primary rounded-full transition-all duration-100"
+          className="bg-primary h-full rounded-full transition-all duration-100"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Animated scanning message */}
-      <p className="text-xs text-muted-foreground animate-pulse min-h-4">{SCANNING_MESSAGES[msgIdx]}</p>
+      <p className="text-muted-foreground min-h-4 animate-pulse text-xs">
+        {SCANNING_MESSAGES[msgIdx]}
+      </p>
     </div>
   );
 }
@@ -67,91 +75,148 @@ function ScanningAnimation() {
 function ResultDisplay({ fingerprint }: { fingerprint: PollutionFingerprint }) {
   const sourceCfg = SOURCE_TYPE_CONFIG[fingerprint.sourceType];
   const severityPct = (fingerprint.severity / 10) * 100;
-  const severityColor = fingerprint.severity >= 8 ? '#ef4444' : fingerprint.severity >= 6 ? '#f97316' : fingerprint.severity >= 4 ? '#f59e0b' : '#22c55e';
-  const healthColor = fingerprint.healthRisk === 'critical' ? '#8b5cf6' : fingerprint.healthRisk === 'high' ? '#ef4444' : fingerprint.healthRisk === 'medium' ? '#f97316' : '#22c55e';
+  const severityColor =
+    fingerprint.severity >= 8
+      ? '#ef4444'
+      : fingerprint.severity >= 6
+        ? '#f97316'
+        : fingerprint.severity >= 4
+          ? '#f59e0b'
+          : '#22c55e';
+  const healthColor =
+    fingerprint.healthRisk === 'critical'
+      ? '#8b5cf6'
+      : fingerprint.healthRisk === 'high'
+        ? '#ef4444'
+        : fingerprint.healthRisk === 'medium'
+          ? '#f97316'
+          : '#22c55e';
 
   return (
-    <div className="bg-emerald-500/5 border border-emerald-500/25 rounded-xl p-5 space-y-4">
+    <div className="space-y-4 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-5">
       {/* Header */}
       <div className="flex items-center gap-2">
         <CheckCircle2 className="size-4 text-emerald-400" />
-        <span className="text-sm font-semibold text-emerald-400">Analysis Complete</span>
+        <span className="text-sm font-semibold text-emerald-400">
+          Analysis Complete
+        </span>
       </div>
 
       {/* Source classification */}
-      <div className="flex items-start gap-3 p-3 bg-card rounded-lg border border-border">
+      <div className="bg-card border-border flex items-start gap-3 rounded-lg border p-3">
         <span className="text-2xl">{sourceCfg?.emoji ?? '❓'}</span>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-semibold">{sourceCfg?.label ?? fingerprint.sourceType}</p>
-            <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-secondary text-muted-foreground">
+            <p className="font-semibold">
+              {sourceCfg?.label ?? fingerprint.sourceType}
+            </p>
+            <span className="bg-secondary text-muted-foreground rounded-full px-1.5 py-0.5 text-xs font-medium">
               {Math.round(fingerprint.confidence * 100)}% confidence
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{fingerprint.description}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-relaxed">
+            {fingerprint.description}
+          </p>
         </div>
       </div>
 
       {/* Metrics row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="p-2.5 bg-card rounded-lg border border-border text-center">
-          <p className="text-xs text-muted-foreground">Severity</p>
-          <p className="text-xl font-bold mt-0.5" style={{ color: severityColor }}>{fingerprint.severity}/10</p>
+        <div className="bg-card border-border rounded-lg border p-2.5 text-center">
+          <p className="text-muted-foreground text-xs">Severity</p>
+          <p
+            className="mt-0.5 text-xl font-bold"
+            style={{ color: severityColor }}
+          >
+            {fingerprint.severity}/10
+          </p>
         </div>
-        <div className="p-2.5 bg-card rounded-lg border border-border text-center">
-          <p className="text-xs text-muted-foreground">Health Risk</p>
-          <p className="text-sm font-bold mt-0.5 capitalize" style={{ color: healthColor }}>{fingerprint.healthRisk}</p>
+        <div className="bg-card border-border rounded-lg border p-2.5 text-center">
+          <p className="text-muted-foreground text-xs">Health Risk</p>
+          <p
+            className="mt-0.5 text-sm font-bold capitalize"
+            style={{ color: healthColor }}
+          >
+            {fingerprint.healthRisk}
+          </p>
         </div>
-        <div className="p-2.5 bg-card rounded-lg border border-border text-center">
-          <p className="text-xs text-muted-foreground">Radius</p>
-          <p className="text-sm font-bold mt-0.5">{fingerprint.estimatedRadiusMeters}m</p>
+        <div className="bg-card border-border rounded-lg border p-2.5 text-center">
+          <p className="text-muted-foreground text-xs">Radius</p>
+          <p className="mt-0.5 text-sm font-bold">
+            {fingerprint.estimatedRadiusMeters}m
+          </p>
         </div>
       </div>
 
       {/* Severity bar */}
       <div>
-        <div className="flex justify-between text-xs mb-1">
+        <div className="mb-1 flex justify-between text-xs">
           <span className="text-muted-foreground">Severity level</span>
-          <span className="font-medium" style={{ color: severityColor }}>{fingerprint.severity}/10</span>
+          <span className="font-medium" style={{ color: severityColor }}>
+            {fingerprint.severity}/10
+          </span>
         </div>
-        <div className="h-2 bg-secondary rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${severityPct}%`, backgroundColor: severityColor }} />
+        <div className="bg-secondary h-2 overflow-hidden rounded-full">
+          <div
+            className="h-full rounded-full transition-all duration-1000"
+            style={{ width: `${severityPct}%`, backgroundColor: severityColor }}
+          />
         </div>
       </div>
 
       {/* Pollutants */}
       <div>
-        <p className="text-xs text-muted-foreground mb-1.5">Identified Pollutants</p>
+        <p className="text-muted-foreground mb-1.5 text-xs">
+          Identified Pollutants
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {fingerprint.pollutants.map((p) => (
-            <span key={p} className="text-xs px-2 py-0.5 rounded-full bg-secondary border border-border font-mono">{p}</span>
+            <span
+              key={p}
+              className="bg-secondary border-border rounded-full border px-2 py-0.5 font-mono text-xs"
+            >
+              {p}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Recommended action */}
-      <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-        <p className="text-xs font-semibold text-amber-400 mb-1">Municipal Action Required</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">{fingerprint.recommendedAction}</p>
+      <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+        <p className="mb-1 text-xs font-semibold text-amber-400">
+          Municipal Action Required
+        </p>
+        <p className="text-muted-foreground text-xs leading-relaxed">
+          {fingerprint.recommendedAction}
+        </p>
       </div>
     </div>
   );
 }
 
-export function AiAnalysisDisplay({ status, fingerprint, error }: AiAnalysisDisplayProps) {
+export function AiAnalysisDisplay({
+  status,
+  fingerprint,
+  error,
+}: AiAnalysisDisplayProps) {
   if (status === 'idle') return null;
   if (status === 'scanning') return <ScanningAnimation />;
   if (status === 'error') {
     return (
-      <div className="bg-destructive/10 border border-destructive/25 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle className="size-4 text-destructive mt-0.5 shrink-0" />
+      <div className="bg-destructive/10 border-destructive/25 flex items-start gap-3 rounded-xl border p-4">
+        <AlertCircle className="text-destructive mt-0.5 size-4 shrink-0" />
         <div>
-          <p className="text-sm font-semibold text-destructive">Analysis Failed</p>
-          <p className="text-xs text-muted-foreground mt-1">{error ?? 'Please try again.'}</p>
+          <p className="text-destructive text-sm font-semibold">
+            Analysis Failed
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            {error ?? 'Please try again.'}
+          </p>
         </div>
       </div>
     );
   }
-  if (status === 'complete' && fingerprint) return <ResultDisplay fingerprint={fingerprint} />;
+  if (status === 'complete' && fingerprint)
+    return <ResultDisplay fingerprint={fingerprint} />;
   return null;
 }

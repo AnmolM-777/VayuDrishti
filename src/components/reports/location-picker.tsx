@@ -12,7 +12,7 @@ interface LocationPickerProps {
 
 const DELHI_DEFAULT: GeoLocation = {
   lat: 28.6139,
-  lng: 77.2090,
+  lng: 77.209,
   address: 'Delhi, India',
   city: 'Delhi',
 };
@@ -30,7 +30,10 @@ async function reverseGeocode(lat: number, lng: number): Promise<string> {
   }
 }
 
-export function LocationPicker({ onLocationSelected, location }: LocationPickerProps) {
+export function LocationPicker({
+  onLocationSelected,
+  location,
+}: LocationPickerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manualLat, setManualLat] = useState('');
@@ -83,7 +86,10 @@ export function LocationPicker({ onLocationSelected, location }: LocationPickerP
         onLocationSelected({ lat, lng, address, city: 'Delhi' });
         setLoading(false);
       },
-      () => { setError('GPS unavailable'); setLoading(false); },
+      () => {
+        setError('GPS unavailable');
+        setLoading(false);
+      },
       { timeout: 10000 },
     );
   }
@@ -91,37 +97,50 @@ export function LocationPicker({ onLocationSelected, location }: LocationPickerP
   return (
     <div className="space-y-3">
       {/* Current location display */}
-      <div className={cn(
-        'flex items-start gap-3 p-3 rounded-lg border transition-colors',
-        location ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border bg-secondary',
-      )}>
-        {loading ? (
-          <Loader2 className="size-4 text-muted-foreground animate-spin mt-0.5 shrink-0" />
-        ) : (
-          <MapPin className={cn('size-4 mt-0.5 shrink-0', location ? 'text-emerald-400' : 'text-muted-foreground')} />
+      <div
+        className={cn(
+          'flex items-start gap-3 rounded-lg border p-3 transition-colors',
+          location
+            ? 'border-emerald-500/30 bg-emerald-500/5'
+            : 'border-border bg-secondary',
         )}
-        <div className="flex-1 min-w-0">
+      >
+        {loading ? (
+          <Loader2 className="text-muted-foreground mt-0.5 size-4 shrink-0 animate-spin" />
+        ) : (
+          <MapPin
+            className={cn(
+              'mt-0.5 size-4 shrink-0',
+              location ? 'text-emerald-400' : 'text-muted-foreground',
+            )}
+          />
+        )}
+        <div className="min-w-0 flex-1">
           {loading ? (
-            <p className="text-sm text-muted-foreground">Detecting your location...</p>
+            <p className="text-muted-foreground text-sm">
+              Detecting your location...
+            </p>
           ) : location ? (
             <>
-              <p className="text-sm font-medium truncate">{location.address}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="truncate text-sm font-medium">{location.address}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
               </p>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">No location detected</p>
+            <p className="text-muted-foreground text-sm">
+              No location detected
+            </p>
           )}
         </div>
         <button
           type="button"
           onClick={handleRefetch}
           disabled={loading}
-          className="shrink-0 p-1.5 rounded-lg hover:bg-accent transition-colors disabled:opacity-50"
+          className="hover:bg-accent shrink-0 rounded-lg p-1.5 transition-colors disabled:opacity-50"
           title="Refresh GPS"
         >
-          <LocateFixed className="size-3.5 text-muted-foreground" />
+          <LocateFixed className="text-muted-foreground size-3.5" />
         </button>
       </div>
 
@@ -129,7 +148,7 @@ export function LocationPicker({ onLocationSelected, location }: LocationPickerP
 
       {/* Manual override */}
       <details className="text-xs">
-        <summary className="text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+        <summary className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
           Enter coordinates manually
         </summary>
         <div className="mt-2 flex gap-2">
@@ -139,7 +158,7 @@ export function LocationPicker({ onLocationSelected, location }: LocationPickerP
             placeholder="Latitude"
             value={manualLat}
             onChange={(e) => setManualLat(e.target.value)}
-            className="flex-1 px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+            className="bg-secondary border-border focus:ring-primary flex-1 rounded-lg border px-2 py-1.5 text-xs focus:ring-1 focus:outline-none"
           />
           <input
             type="number"
@@ -147,12 +166,12 @@ export function LocationPicker({ onLocationSelected, location }: LocationPickerP
             placeholder="Longitude"
             value={manualLng}
             onChange={(e) => setManualLng(e.target.value)}
-            className="flex-1 px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+            className="bg-secondary border-border focus:ring-primary flex-1 rounded-lg border px-2 py-1.5 text-xs focus:ring-1 focus:outline-none"
           />
           <button
             type="button"
             onClick={handleManualSubmit}
-            className="px-2 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90"
+            className="bg-primary text-primary-foreground rounded-lg px-2 py-1.5 text-xs font-medium hover:opacity-90"
           >
             Set
           </button>

@@ -17,16 +17,18 @@ export default function ReportsPage() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-secondary rounded-lg w-fit">
-        {([
-          { key: 'submit', label: '📸 Submit Report' },
-          { key: 'history', label: '📋 My Reports' },
-        ] as const).map(({ key, label }) => (
+      <div className="bg-secondary flex w-fit gap-1 rounded-lg p-1">
+        {(
+          [
+            { key: 'submit', label: '📸 Submit Report' },
+            { key: 'history', label: '📋 My Reports' },
+          ] as const
+        ).map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
             className={cn(
-              'px-4 py-1.5 rounded-md text-sm font-medium transition-all',
+              'rounded-md px-4 py-1.5 text-sm font-medium transition-all',
               activeTab === key
                 ? 'bg-card text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
