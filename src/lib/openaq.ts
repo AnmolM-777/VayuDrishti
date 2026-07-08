@@ -59,7 +59,7 @@ export async function fetchIndiaStations(
   limit: number = 100,
 ): Promise<MonitoringStation[]> {
   const params = new URLSearchParams({
-    country_id: '101',  // India
+    country_id: '101', // India
     limit: String(limit),
     order_by: 'id',
     sort_order: 'asc',
@@ -71,7 +71,9 @@ export async function fetchIndiaStations(
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAQ API error: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `OpenAQ API error: ${response.status} ${response.statusText}`,
+    );
   }
 
   const data = (await response.json()) as OpenAQLocationsResponse;
@@ -96,8 +98,9 @@ export async function fetchIndiaStations(
   if (city) {
     const cityLower = city.toLowerCase();
     stations = stations.filter(
-      (s) => s.city.toLowerCase().includes(cityLower) ||
-             s.name.toLowerCase().includes(cityLower),
+      (s) =>
+        s.city.toLowerCase().includes(cityLower) ||
+        s.name.toLowerCase().includes(cityLower),
     );
   }
 
@@ -139,7 +142,8 @@ export async function fetchStationMeasurements(
 
   // Build reading from latest measurements
   const reading: Partial<StationReading> = {
-    timestamp: data.results[0]?.period?.datetimeTo?.utc ?? new Date().toISOString(),
+    timestamp:
+      data.results[0]?.period?.datetimeTo?.utc ?? new Date().toISOString(),
   };
 
   for (const m of data.results) {
@@ -177,7 +181,8 @@ function computeIndianAQI(pm25: number): number {
   for (const bp of breakpoints) {
     if (pm25 >= bp.cLow && pm25 <= bp.cHigh) {
       return Math.round(
-        ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) * (pm25 - bp.cLow) + bp.iLow,
+        ((bp.iHigh - bp.iLow) / (bp.cHigh - bp.cLow)) * (pm25 - bp.cLow) +
+          bp.iLow,
       );
     }
   }
@@ -186,7 +191,9 @@ function computeIndianAQI(pm25: number): number {
 }
 
 // ─── Fetch all Delhi stations with their latest readings ────────────
-export async function fetchDelhiStationsWithReadings(): Promise<MonitoringStation[]> {
+export async function fetchDelhiStationsWithReadings(): Promise<
+  MonitoringStation[]
+> {
   const stations = await fetchIndiaStations('Delhi', 50);
 
   // Fetch readings in parallel (batch of 5 to avoid rate limits)
@@ -201,7 +208,11 @@ export async function fetchDelhiStationsWithReadings(): Promise<MonitoringStatio
     );
 
     for (let j = 0; j < batch.length; j++) {
-      const result = readings[j] as PromiseSettledResult<Awaited<ReturnType<typeof fetchStationMeasurements>>> | undefined;
+      const result = readings[j] as
+        | PromiseSettledResult<
+            Awaited<ReturnType<typeof fetchStationMeasurements>>
+          >
+        | undefined;
       if (result && result.status === 'fulfilled' && result.value) {
         const station = stations[i + j];
         if (station) station.latestReading = result.value;

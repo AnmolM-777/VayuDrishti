@@ -9,7 +9,8 @@ import type { GeoLocation, PollutionSourceType } from './report';
 // ─── Alert priority levels ──────────────────────────────────────────
 export type AlertPriority = 'green' | 'yellow' | 'orange' | 'red' | 'purple';
 
-export type AlertStatus = 'active' | 'acknowledged' | 'dispatched' | 'resolved' | 'expired';
+export type AlertStatus =
+  'active' | 'acknowledged' | 'dispatched' | 'resolved' | 'expired';
 
 // ─── Pollution alert ────────────────────────────────────────────────
 export interface PollutionAlert {
@@ -42,12 +43,7 @@ export type ResourceType =
   | 'road_sweeper';
 
 export type DispatchStatus =
-  | 'pending'
-  | 'assigned'
-  | 'en_route'
-  | 'on_site'
-  | 'completed'
-  | 'cancelled';
+  'pending' | 'assigned' | 'en_route' | 'on_site' | 'completed' | 'cancelled';
 
 // ─── Municipal resource ─────────────────────────────────────────────
 export interface MunicipalResource {
@@ -101,7 +97,13 @@ export interface CreateDispatchResponse {
 // ─── Display helpers ────────────────────────────────────────────────
 export const ALERT_PRIORITY_CONFIG: Record<
   AlertPriority,
-  { label: string; color: string; bgColor: string; aqiRange: string; action: string }
+  {
+    label: string;
+    color: string;
+    bgColor: string;
+    aqiRange: string;
+    action: string;
+  }
 > = {
   green: {
     label: 'Normal',

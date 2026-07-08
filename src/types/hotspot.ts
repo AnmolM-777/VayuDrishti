@@ -7,11 +7,11 @@ import type { GeoLocation, PollutionSourceType } from './report';
 
 // ─── Hotspot status lifecycle ───────────────────────────────────────
 export type HotspotStatus =
-  | 'detected'    // AI detected, needs verification
-  | 'confirmed'   // Verified by multiple reports or municipal officer
-  | 'dispatched'  // Cleanup resources assigned
+  | 'detected' // AI detected, needs verification
+  | 'confirmed' // Verified by multiple reports or municipal officer
+  | 'dispatched' // Cleanup resources assigned
   | 'in_progress' // Cleanup underway
-  | 'resolved'    // Hotspot cleared
+  | 'resolved' // Hotspot cleared
   | 'false_alarm'; // Not a real hotspot
 
 // ─── Hotspot severity ───────────────────────────────────────────────
@@ -46,7 +46,7 @@ export interface PollutionHotspot {
 export interface DetectHotspotsRequest {
   cityId?: string;
   windowHours?: number; // Time window for clustering (default: 2)
-  minReports?: number;  // Minimum reports to form hotspot (default: 2)
+  minReports?: number; // Minimum reports to form hotspot (default: 2)
   radiusMeters?: number; // Clustering radius (default: 500)
 }
 
@@ -73,7 +73,12 @@ export const HOTSPOT_SEVERITY_CONFIG: Record<
   low: { label: 'Low', color: '#22c55e', bgColor: '#dcfce7', icon: '🟢' },
   medium: { label: 'Medium', color: '#eab308', bgColor: '#fef9c3', icon: '🟡' },
   high: { label: 'High', color: '#f97316', bgColor: '#ffedd5', icon: '🟠' },
-  critical: { label: 'Critical', color: '#ef4444', bgColor: '#fee2e2', icon: '🔴' },
+  critical: {
+    label: 'Critical',
+    color: '#ef4444',
+    bgColor: '#fee2e2',
+    icon: '🔴',
+  },
 };
 
 export const HOTSPOT_STATUS_CONFIG: Record<

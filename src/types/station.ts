@@ -6,18 +6,18 @@ import type { GeoLocation } from './report';
 
 // ─── AQI categories (Indian NAQI standard) ─────────────────────────
 export type AQICategory =
-  | 'good'        // 0–50
+  | 'good' // 0–50
   | 'satisfactory' // 51–100
-  | 'moderate'     // 101–200
-  | 'poor'         // 201–300
-  | 'very_poor'    // 301–400
-  | 'severe';      // 401–500+
+  | 'moderate' // 101–200
+  | 'poor' // 201–300
+  | 'very_poor' // 301–400
+  | 'severe'; // 401–500+
 
 // ─── Individual pollutant reading ───────────────────────────────────
 export interface PollutantReading {
   parameter: string; // 'pm25', 'pm10', 'no2', 'so2', 'co', 'o3'
   value: number;
-  unit: string;      // 'µg/m³', 'ppm'
+  unit: string; // 'µg/m³', 'ppm'
   lastUpdated: string;
 }
 
@@ -71,7 +71,13 @@ export function getAQICategory(aqi: number): AQICategory {
 
 export const AQI_CATEGORY_CONFIG: Record<
   AQICategory,
-  { label: string; color: string; textColor: string; emoji: string; healthAdvice: string }
+  {
+    label: string;
+    color: string;
+    textColor: string;
+    emoji: string;
+    healthAdvice: string;
+  }
 > = {
   good: {
     label: 'Good',
@@ -99,20 +105,23 @@ export const AQI_CATEGORY_CONFIG: Record<
     color: '#f97316',
     textColor: '#ffffff',
     emoji: '😷',
-    healthAdvice: 'May cause breathing discomfort for most people on prolonged exposure.',
+    healthAdvice:
+      'May cause breathing discomfort for most people on prolonged exposure.',
   },
   very_poor: {
     label: 'Very Poor',
     color: '#ef4444',
     textColor: '#ffffff',
     emoji: '🤢',
-    healthAdvice: 'May cause respiratory illness on prolonged exposure. Avoid outdoor activity.',
+    healthAdvice:
+      'May cause respiratory illness on prolonged exposure. Avoid outdoor activity.',
   },
   severe: {
     label: 'Severe',
     color: '#991b1b',
     textColor: '#ffffff',
     emoji: '☠️',
-    healthAdvice: 'Health alert: everyone may experience serious health effects. Stay indoors.',
+    healthAdvice:
+      'Health alert: everyone may experience serious health effects. Stay indoors.',
   },
 };

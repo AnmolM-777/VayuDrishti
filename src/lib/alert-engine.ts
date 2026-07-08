@@ -32,9 +32,11 @@ export function generateAlertFromHotspot(
   const actionMap: Record<AlertPriority, string> = {
     green: 'Continue routine monitoring.',
     yellow: 'Increase monitoring frequency. Issue local advisory.',
-    orange: 'Deploy water sprinklers on surrounding roads. Issue air quality advisory.',
+    orange:
+      'Deploy water sprinklers on surrounding roads. Issue air quality advisory.',
     red: 'Deploy water mist cannons + cleanup crew immediately. Issue public health advisory.',
-    purple: 'Emergency response. Deploy all available resources. Consider area evacuation.',
+    purple:
+      'Emergency response. Deploy all available resources. Consider area evacuation.',
   };
 
   return {
@@ -59,12 +61,21 @@ export function processHotspotsForAlerts(
   hotspots: PollutionHotspot[],
   minPriority: AlertPriority = 'yellow',
 ): PollutionAlert[] {
-  const priorityOrder: AlertPriority[] = ['green', 'yellow', 'orange', 'red', 'purple'];
+  const priorityOrder: AlertPriority[] = [
+    'green',
+    'yellow',
+    'orange',
+    'red',
+    'purple',
+  ];
   const minIndex = priorityOrder.indexOf(minPriority);
 
   return hotspots
     .filter((h) => h.status !== 'resolved' && h.status !== 'false_alarm')
     .map((h) => generateAlertFromHotspot(h))
     .filter((a) => priorityOrder.indexOf(a.priority) >= minIndex)
-    .sort((a, b) => priorityOrder.indexOf(b.priority) - priorityOrder.indexOf(a.priority));
+    .sort(
+      (a, b) =>
+        priorityOrder.indexOf(b.priority) - priorityOrder.indexOf(a.priority),
+    );
 }

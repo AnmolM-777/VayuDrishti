@@ -12,7 +12,8 @@
 import type { MonitoringStation, StationReading } from '@/types/station';
 import { getAQICategory } from '@/types/station';
 
-const AIR_QUALITY_API = 'https://airquality.googleapis.com/v1/currentConditions:lookup';
+const AIR_QUALITY_API =
+  'https://airquality.googleapis.com/v1/currentConditions:lookup';
 
 // Delhi's major monitoring areas — we query AQI for each
 const DELHI_MONITORING_LOCATIONS: Array<{
@@ -22,20 +23,56 @@ const DELHI_MONITORING_LOCATIONS: Array<{
   lat: number;
   lng: number;
 }> = [
-  { id: 'gaq-001', name: 'ITO',                   ward: 'ITO',            lat: 28.6289, lng: 77.2402 },
-  { id: 'gaq-002', name: 'Anand Vihar',            ward: 'Anand Vihar',   lat: 28.6469, lng: 77.3164 },
-  { id: 'gaq-003', name: 'R.K. Puram',             ward: 'RK Puram',      lat: 28.5631, lng: 77.1722 },
-  { id: 'gaq-004', name: 'Punjabi Bagh',           ward: 'Punjabi Bagh',  lat: 28.6677, lng: 77.1317 },
-  { id: 'gaq-005', name: 'Lodhi Road',             ward: 'Lodhi Colony',  lat: 28.5918, lng: 77.2281 },
-  { id: 'gaq-006', name: 'Okhla Phase 2',          ward: 'Okhla',         lat: 28.5494, lng: 77.2802 },
-  { id: 'gaq-007', name: 'Rohini',                 ward: 'Rohini',        lat: 28.7358, lng: 77.1218 },
-  { id: 'gaq-008', name: 'Dwarka Sector 8',        ward: 'Dwarka',        lat: 28.5921, lng: 77.0512 },
+  { id: 'gaq-001', name: 'ITO', ward: 'ITO', lat: 28.6289, lng: 77.2402 },
+  {
+    id: 'gaq-002',
+    name: 'Anand Vihar',
+    ward: 'Anand Vihar',
+    lat: 28.6469,
+    lng: 77.3164,
+  },
+  {
+    id: 'gaq-003',
+    name: 'R.K. Puram',
+    ward: 'RK Puram',
+    lat: 28.5631,
+    lng: 77.1722,
+  },
+  {
+    id: 'gaq-004',
+    name: 'Punjabi Bagh',
+    ward: 'Punjabi Bagh',
+    lat: 28.6677,
+    lng: 77.1317,
+  },
+  {
+    id: 'gaq-005',
+    name: 'Lodhi Road',
+    ward: 'Lodhi Colony',
+    lat: 28.5918,
+    lng: 77.2281,
+  },
+  {
+    id: 'gaq-006',
+    name: 'Okhla Phase 2',
+    ward: 'Okhla',
+    lat: 28.5494,
+    lng: 77.2802,
+  },
+  { id: 'gaq-007', name: 'Rohini', ward: 'Rohini', lat: 28.7358, lng: 77.1218 },
+  {
+    id: 'gaq-008',
+    name: 'Dwarka Sector 8',
+    ward: 'Dwarka',
+    lat: 28.5921,
+    lng: 77.0512,
+  },
 ];
 
 // ─── API response types ───────────────────────────────────────────────
 
 interface GoogleAQIIndex {
-  code: string;        // 'uaqi' | 'ind_cpcb'
+  code: string; // 'uaqi' | 'ind_cpcb'
   displayName: string;
   aqi: number;
   aqiDisplay: string;
@@ -45,7 +82,7 @@ interface GoogleAQIIndex {
 }
 
 interface GooglePollutant {
-  code: string;         // 'pm25' | 'pm10' | 'no2' | 'o3' | 'co' | 'so2'
+  code: string; // 'pm25' | 'pm10' | 'no2' | 'o3' | 'co' | 'so2'
   displayName: string;
   concentration: { value: number; units: string };
 }
@@ -71,7 +108,11 @@ async function fetchLocationAQ(
       body: JSON.stringify({
         universalAqi: true,
         location: { latitude: lat, longitude: lng },
-        extraComputations: ['POLLUTANT_CONCENTRATION', 'LOCAL_AQI', 'HEALTH_RECOMMENDATIONS'],
+        extraComputations: [
+          'POLLUTANT_CONCENTRATION',
+          'LOCAL_AQI',
+          'HEALTH_RECOMMENDATIONS',
+        ],
         languageCode: 'en',
       }),
       next: { revalidate: 900 }, // cache 15 min
@@ -102,7 +143,9 @@ function toStationReading(data: GoogleAQResponse): StationReading {
 
   // Extract individual pollutants
   function getPollutant(code: string) {
-    return data.pollutants?.find((p) => p.code === code)?.concentration?.value ?? 0;
+    return (
+      data.pollutants?.find((p) => p.code === code)?.concentration?.value ?? 0
+    );
   }
 
   return {
@@ -121,7 +164,9 @@ function toStationReading(data: GoogleAQResponse): StationReading {
 
 // ─── Main export ─────────────────────────────────────────────────────
 
-export async function fetchDelhiStationsViaGoogleAQ(): Promise<MonitoringStation[]> {
+export async function fetchDelhiStationsViaGoogleAQ(): Promise<
+  MonitoringStation[]
+> {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey || apiKey === 'your_google_maps_api_key_here') {
     throw new Error('GOOGLE_MAPS_API_KEY is not configured');
@@ -129,31 +174,37 @@ export async function fetchDelhiStationsViaGoogleAQ(): Promise<MonitoringStation
 
   // Fetch all locations in parallel (rate limit: 1000 req/day on free tier)
   const results = await Promise.allSettled(
-    DELHI_MONITORING_LOCATIONS.map((loc) => fetchLocationAQ(loc.lat, loc.lng, apiKey)),
+    DELHI_MONITORING_LOCATIONS.map((loc) =>
+      fetchLocationAQ(loc.lat, loc.lng, apiKey),
+    ),
   );
 
-  const stations: MonitoringStation[] = DELHI_MONITORING_LOCATIONS.map((loc, idx) => {
-    const result = results[idx];
-    const data =
-      result !== undefined && result.status === 'fulfilled' ? result.value : null;
+  const stations: MonitoringStation[] = DELHI_MONITORING_LOCATIONS.map(
+    (loc, idx) => {
+      const result = results[idx];
+      const data =
+        result !== undefined && result.status === 'fulfilled'
+          ? result.value
+          : null;
 
-    return {
-      id: loc.id,
-      name: loc.name,
-      city: 'Delhi',
-      state: 'Delhi',
-      source: 'cpcb' as const,
-      isActive: true,
-      location: {
-        lat: loc.lat,
-        lng: loc.lng,
-        address: loc.name,
-        ward: loc.ward,
+      return {
+        id: loc.id,
+        name: loc.name,
         city: 'Delhi',
-      },
-      latestReading: data ? toStationReading(data) : undefined,
-    };
-  });
+        state: 'Delhi',
+        source: 'cpcb' as const,
+        isActive: true,
+        location: {
+          lat: loc.lat,
+          lng: loc.lng,
+          address: loc.name,
+          ward: loc.ward,
+          city: 'Delhi',
+        },
+        latestReading: data ? toStationReading(data) : undefined,
+      };
+    },
+  );
 
   // Only return stations that got a successful reading
   return stations.filter((s) => s.latestReading !== undefined);

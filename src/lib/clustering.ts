@@ -41,9 +41,9 @@ function computeCentroid(points: GeoLocation[]): GeoLocation {
 
 // ─── DBSCAN-like clustering ─────────────────────────────────────────
 interface ClusterConfig {
-  radiusMeters: number;    // Max distance between reports in a cluster
-  minReports: number;      // Minimum reports to form a hotspot
-  windowMs: number;        // Time window in milliseconds
+  radiusMeters: number; // Max distance between reports in a cluster
+  minReports: number; // Minimum reports to form a hotspot
+  windowMs: number; // Time window in milliseconds
 }
 
 const DEFAULT_CONFIG: ClusterConfig = {
@@ -110,15 +110,19 @@ export function clusterReports(
 }
 
 // ─── Convert clusters to hotspots ───────────────────────────────────
-export function clustersToHotspots(clusters: ReportCluster[]): PollutionHotspot[] {
+export function clustersToHotspots(
+  clusters: ReportCluster[],
+): PollutionHotspot[] {
   return clusters.map((cluster, index) => {
     const reports = cluster.reports;
 
     // Compute severity score (0–100)
     const avgSeverity =
-      reports.reduce((sum, r) => sum + (r.aiAnalysis?.severity ?? 5), 0) / reports.length;
+      reports.reduce((sum, r) => sum + (r.aiAnalysis?.severity ?? 5), 0) /
+      reports.length;
     const avgConfidence =
-      reports.reduce((sum, r) => sum + (r.aiAnalysis?.confidence ?? 0.5), 0) / reports.length;
+      reports.reduce((sum, r) => sum + (r.aiAnalysis?.confidence ?? 0.5), 0) /
+      reports.length;
     const reportCountFactor = Math.min(reports.length / 5, 1); // More reports = higher confidence
     const severityScore = Math.round(
       avgSeverity * 8 * avgConfidence * (0.5 + 0.5 * reportCountFactor),
@@ -130,9 +134,9 @@ export function clustersToHotspots(clusters: ReportCluster[]): PollutionHotspot[
       const src = r.aiAnalysis?.sourceType ?? 'unknown';
       sourceCounts[src] = (sourceCounts[src] ?? 0) + 1;
     }
-    const dominantSource = Object.entries(sourceCounts).sort(
-      ([, a], [, b]) => b - a,
-    )[0]?.[0] ?? 'unknown';
+    const dominantSource =
+      Object.entries(sourceCounts).sort(([, a], [, b]) => b - a)[0]?.[0] ??
+      'unknown';
 
     // Determine address from first report with address
     const address = reports.find((r) => r.location.address)?.location.address;

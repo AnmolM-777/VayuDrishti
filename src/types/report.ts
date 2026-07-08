@@ -17,7 +17,8 @@ export type SeverityLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export type HealthRisk = 'low' | 'medium' | 'high' | 'critical';
 
-export type ReportStatus = 'pending' | 'analyzing' | 'verified' | 'rejected' | 'resolved';
+export type ReportStatus =
+  'pending' | 'analyzing' | 'verified' | 'rejected' | 'resolved';
 
 // ─── Gemini AI analysis result ──────────────────────────────────────
 export interface PollutionFingerprint {
@@ -87,7 +88,11 @@ export const SOURCE_TYPE_CONFIG: Record<
   garbage_burning: { label: 'Garbage Burning', emoji: '🔥', color: '#ef4444' },
   industrial: { label: 'Industrial Emission', emoji: '🏭', color: '#f97316' },
   vehicle_exhaust: { label: 'Vehicle Exhaust', emoji: '🚗', color: '#eab308' },
-  construction_dust: { label: 'Construction Dust', emoji: '🏗️', color: '#a3a3a3' },
+  construction_dust: {
+    label: 'Construction Dust',
+    emoji: '🏗️',
+    color: '#a3a3a3',
+  },
   crop_burning: { label: 'Crop Burning', emoji: '🌾', color: '#dc2626' },
   road_dust: { label: 'Road Dust', emoji: '🛣️', color: '#78716c' },
   unknown: { label: 'Unknown Source', emoji: '❓', color: '#6b7280' },
