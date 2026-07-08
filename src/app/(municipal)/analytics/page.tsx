@@ -117,7 +117,7 @@ export default function AnalyticsPage() {
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="group rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            className="group bg-card rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
           >
             <div className="mb-2 flex items-center justify-between">
               <span className="text-muted-foreground text-xs font-medium">
@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* ── Source Breakdown Bar Chart ──────────────────────────── */}
-        <section className="rounded-xl border bg-card p-5 shadow-sm">
+        <section className="bg-card rounded-xl border p-5 shadow-sm">
           <h2 className="mb-1 text-lg font-semibold tracking-tight">
             Pollution Source Breakdown
           </h2>
@@ -167,7 +167,7 @@ export default function AnalyticsPage() {
                       {count} report{count > 1 ? 's' : ''} · {pct}%
                     </span>
                   </div>
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+                  <div className="bg-muted h-3 w-full overflow-hidden rounded-full">
                     <div
                       className="h-full rounded-full transition-all duration-500 group-hover:opacity-90"
                       style={{
@@ -188,7 +188,7 @@ export default function AnalyticsPage() {
               return (
                 <div
                   key={source}
-                  className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                  className="text-muted-foreground flex items-center gap-1.5 text-xs"
                 >
                   <span
                     className="h-2.5 w-2.5 rounded-full"
@@ -202,7 +202,7 @@ export default function AnalyticsPage() {
         </section>
 
         {/* ── Recent Resolved Alerts ──────────────────────────────── */}
-        <section className="rounded-xl border bg-card p-5 shadow-sm">
+        <section className="bg-card rounded-xl border p-5 shadow-sm">
           <h2 className="mb-1 text-lg font-semibold tracking-tight">
             Recent Resolved Alerts
           </h2>
@@ -213,15 +213,16 @@ export default function AnalyticsPage() {
           {resolvedAlerts.length > 0 ? (
             <div className="space-y-3">
               {resolvedAlerts.map((alert) => {
-                const priorityCfg = ALERT_PRIORITY_CONFIG[alert.priority as AlertPriority];
+                const priorityCfg =
+                  ALERT_PRIORITY_CONFIG[alert.priority as AlertPriority];
                 const sourceCfg = SOURCE_TYPE_CONFIG[alert.sourceType];
                 return (
                   <div
                     key={alert.id}
-                    className="group rounded-lg border bg-background p-4 transition-all duration-200 hover:shadow-sm"
+                    className="group bg-background rounded-lg border p-4 transition-all duration-200 hover:shadow-sm"
                   >
                     <div className="mb-2 flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-semibold leading-snug">
+                      <h3 className="text-sm leading-snug font-semibold">
                         {alert.title}
                       </h3>
                       <span
@@ -274,7 +275,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── Health Risk Overview ──────────────────────────────────── */}
-      <section className="rounded-xl border bg-card p-5 shadow-sm">
+      <section className="bg-card rounded-xl border p-5 shadow-sm">
         <h2 className="mb-1 text-lg font-semibold tracking-tight">
           Health Risk Assessment
         </h2>
@@ -284,10 +285,34 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {(
             [
-              { level: 'low', label: 'Low Risk', color: '#22c55e', bg: '#dcfce7', icon: '💚' },
-              { level: 'medium', label: 'Medium Risk', color: '#eab308', bg: '#fef9c3', icon: '💛' },
-              { level: 'high', label: 'High Risk', color: '#f97316', bg: '#ffedd5', icon: '🧡' },
-              { level: 'critical', label: 'Critical', color: '#ef4444', bg: '#fee2e2', icon: '❤️‍🔥' },
+              {
+                level: 'low',
+                label: 'Low Risk',
+                color: '#22c55e',
+                bg: '#dcfce7',
+                icon: '💚',
+              },
+              {
+                level: 'medium',
+                label: 'Medium Risk',
+                color: '#eab308',
+                bg: '#fef9c3',
+                icon: '💛',
+              },
+              {
+                level: 'high',
+                label: 'High Risk',
+                color: '#f97316',
+                bg: '#ffedd5',
+                icon: '🧡',
+              },
+              {
+                level: 'critical',
+                label: 'Critical',
+                color: '#ef4444',
+                bg: '#fee2e2',
+                icon: '❤️‍🔥',
+              },
             ] as const
           ).map((risk) => {
             const count = reports.filter(
@@ -306,7 +331,10 @@ export default function AnalyticsPage() {
                 >
                   {count}
                 </p>
-                <p className="text-xs font-medium" style={{ color: risk.color }}>
+                <p
+                  className="text-xs font-medium"
+                  style={{ color: risk.color }}
+                >
                   {risk.label}
                 </p>
               </div>

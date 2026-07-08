@@ -3,10 +3,7 @@
 import { format } from 'date-fns';
 import { PageHeader } from '@/components/feedback/page-header';
 import { getSampleDispatches } from '@/lib/sample-data';
-import {
-  RESOURCE_TYPE_CONFIG,
-  DISPATCH_STATUS_CONFIG,
-} from '@/types/alert';
+import { RESOURCE_TYPE_CONFIG, DISPATCH_STATUS_CONFIG } from '@/types/alert';
 import type { ResourceType, DispatchStatus } from '@/types/alert';
 
 export default function DeploymentsPage() {
@@ -71,7 +68,7 @@ export default function DeploymentsPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+            className="bg-card rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
           >
             <p className="text-muted-foreground text-xs font-medium">
               {stat.icon} {stat.label}
@@ -87,30 +84,32 @@ export default function DeploymentsPage() {
       </div>
 
       {/* Deployments table-like layout */}
-      <div className="rounded-xl border bg-card shadow-sm">
+      <div className="bg-card rounded-xl border shadow-sm">
         {/* Header */}
         <div className="hidden border-b px-5 py-3 sm:grid sm:grid-cols-12 sm:gap-4">
-          <span className="text-muted-foreground col-span-3 text-xs font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground col-span-3 text-xs font-semibold tracking-wider uppercase">
             Resource
           </span>
-          <span className="text-muted-foreground col-span-3 text-xs font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground col-span-3 text-xs font-semibold tracking-wider uppercase">
             Target
           </span>
-          <span className="text-muted-foreground col-span-2 text-xs font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground col-span-2 text-xs font-semibold tracking-wider uppercase">
             Status
           </span>
-          <span className="text-muted-foreground col-span-2 text-xs font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground col-span-2 text-xs font-semibold tracking-wider uppercase">
             Timeline
           </span>
-          <span className="text-muted-foreground col-span-2 text-xs font-semibold uppercase tracking-wider">
+          <span className="text-muted-foreground col-span-2 text-xs font-semibold tracking-wider uppercase">
             Impact
           </span>
         </div>
 
         {/* Rows */}
         {sorted.map((dispatch, idx) => {
-          const resourceCfg = RESOURCE_TYPE_CONFIG[dispatch.resourceType as ResourceType];
-          const statusCfg = DISPATCH_STATUS_CONFIG[dispatch.status as DispatchStatus];
+          const resourceCfg =
+            RESOURCE_TYPE_CONFIG[dispatch.resourceType as ResourceType];
+          const statusCfg =
+            DISPATCH_STATUS_CONFIG[dispatch.status as DispatchStatus];
           const isCompleted = dispatch.status === 'completed';
           const isActive =
             dispatch.status === 'en_route' || dispatch.status === 'on_site';
@@ -118,20 +117,22 @@ export default function DeploymentsPage() {
           return (
             <div
               key={dispatch.id}
-              className={`group grid items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/40 sm:grid-cols-12 ${
+              className={`group hover:bg-muted/40 grid items-center gap-4 px-5 py-4 transition-colors sm:grid-cols-12 ${
                 idx < sorted.length - 1 ? 'border-b' : ''
               }`}
             >
               {/* Resource */}
               <div className="col-span-3 flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-lg">
+                <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg text-lg">
                   {resourceCfg.emoji}
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">
                     {dispatch.resourceName}
                   </p>
-                  <p className="text-muted-foreground text-xs">{resourceCfg.label}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {resourceCfg.label}
+                  </p>
                 </div>
               </div>
 
@@ -177,41 +178,39 @@ export default function DeploymentsPage() {
                   {statusCfg.label}
                 </span>
                 {dispatch.eta && (
-                  <p className="mt-1 text-xs font-medium text-foreground">
+                  <p className="text-foreground mt-1 text-xs font-medium">
                     ETA: {dispatch.eta}
                   </p>
                 )}
               </div>
 
               {/* Timeline */}
-              <div className="col-span-2 space-y-0.5 text-xs text-muted-foreground">
+              <div className="text-muted-foreground col-span-2 space-y-0.5 text-xs">
                 <p>
-                  Assigned:{' '}
-                  {format(new Date(dispatch.assignedAt), 'HH:mm')}
+                  Assigned: {format(new Date(dispatch.assignedAt), 'HH:mm')}
                 </p>
                 {dispatch.departedAt && (
                   <p>
-                    Departed:{' '}
-                    {format(new Date(dispatch.departedAt), 'HH:mm')}
+                    Departed: {format(new Date(dispatch.departedAt), 'HH:mm')}
                   </p>
                 )}
                 {dispatch.arrivedAt && (
                   <p>
-                    Arrived:{' '}
-                    {format(new Date(dispatch.arrivedAt), 'HH:mm')}
+                    Arrived: {format(new Date(dispatch.arrivedAt), 'HH:mm')}
                   </p>
                 )}
                 {dispatch.completedAt && (
                   <p className="font-medium text-emerald-600">
-                    Done:{' '}
-                    {format(new Date(dispatch.completedAt), 'HH:mm')}
+                    Done: {format(new Date(dispatch.completedAt), 'HH:mm')}
                   </p>
                 )}
               </div>
 
               {/* Impact */}
               <div className="col-span-2">
-                {isCompleted && dispatch.aqiBefore != null && dispatch.aqiAfter != null ? (
+                {isCompleted &&
+                dispatch.aqiBefore != null &&
+                dispatch.aqiAfter != null ? (
                   <div>
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-red-500">
@@ -225,7 +224,8 @@ export default function DeploymentsPage() {
                     <p className="text-xs text-emerald-600">
                       ↓{' '}
                       {Math.round(
-                        ((dispatch.aqiBefore - dispatch.aqiAfter) / dispatch.aqiBefore) *
+                        ((dispatch.aqiBefore - dispatch.aqiAfter) /
+                          dispatch.aqiBefore) *
                           100,
                       )}
                       % AQI reduction

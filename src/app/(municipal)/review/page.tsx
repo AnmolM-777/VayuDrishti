@@ -5,9 +5,16 @@ import { formatDistanceToNow } from 'date-fns';
 import { PageHeader } from '@/components/feedback/page-header';
 import { getSampleReports } from '@/lib/sample-data';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
-import type { PollutionReport, ReportStatus, PollutionSourceType } from '@/types/report';
+import type {
+  PollutionReport,
+  ReportStatus,
+  PollutionSourceType,
+} from '@/types/report';
 
-const STATUS_STYLE: Record<ReportStatus, { label: string; color: string; bgColor: string }> = {
+const STATUS_STYLE: Record<
+  ReportStatus,
+  { label: string; color: string; bgColor: string }
+> = {
   pending: { label: 'Pending Review', color: '#f59e0b', bgColor: '#fef3c7' },
   analyzing: { label: 'Analyzing', color: '#6366f1', bgColor: '#e0e7ff' },
   verified: { label: 'Verified', color: '#22c55e', bgColor: '#dcfce7' },
@@ -58,10 +65,15 @@ export default function ReviewPage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
+            className="bg-card rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md"
           >
-            <p className="text-muted-foreground text-xs font-medium">{stat.label}</p>
-            <p className="text-2xl font-bold tabular-nums" style={{ color: stat.color }}>
+            <p className="text-muted-foreground text-xs font-medium">
+              {stat.label}
+            </p>
+            <p
+              className="text-2xl font-bold tabular-nums"
+              style={{ color: stat.color }}
+            >
               {stat.value}
             </p>
           </div>
@@ -73,14 +85,17 @@ export default function ReviewPage() {
         {reports.map((report) => {
           const statusCfg = STATUS_STYLE[report.status];
           const sourceCfg = report.aiAnalysis
-            ? SOURCE_TYPE_CONFIG[report.aiAnalysis.sourceType as PollutionSourceType]
+            ? SOURCE_TYPE_CONFIG[
+                report.aiAnalysis.sourceType as PollutionSourceType
+              ]
             : null;
-          const isPending = report.status === 'pending' || report.status === 'analyzing';
+          const isPending =
+            report.status === 'pending' || report.status === 'analyzing';
 
           return (
             <div
               key={report.id}
-              className="group rounded-xl border bg-card shadow-sm transition-all duration-200 hover:shadow-md"
+              className="group bg-card rounded-xl border shadow-sm transition-all duration-200 hover:shadow-md"
             >
               <div className="p-5">
                 {/* Top row: user info + status */}
@@ -124,7 +139,9 @@ export default function ReviewPage() {
                 <p className="text-muted-foreground mb-3 text-xs">
                   📍 {report.location.address ?? 'Unknown location'}
                   {report.location.ward && (
-                    <span className="ml-1 opacity-70">· Ward: {report.location.ward}</span>
+                    <span className="ml-1 opacity-70">
+                      · Ward: {report.location.ward}
+                    </span>
                   )}
                 </p>
 
@@ -143,7 +160,9 @@ export default function ReviewPage() {
 
                     {/* Severity bar */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-muted-foreground text-xs">Severity</span>
+                      <span className="text-muted-foreground text-xs">
+                        Severity
+                      </span>
                       <div className="flex gap-0.5">
                         {Array.from({ length: 10 }, (_, i) => (
                           <div
@@ -176,8 +195,8 @@ export default function ReviewPage() {
 
                 {/* AI description */}
                 {report.aiAnalysis && (
-                  <div className="mb-4 rounded-lg bg-muted/50 px-4 py-3">
-                    <p className="text-muted-foreground mb-1 text-xs font-semibold uppercase tracking-wider">
+                  <div className="bg-muted/50 mb-4 rounded-lg px-4 py-3">
+                    <p className="text-muted-foreground mb-1 text-xs font-semibold tracking-wider uppercase">
                       🤖 AI Analysis
                     </p>
                     <p className="text-sm leading-relaxed">
@@ -188,7 +207,7 @@ export default function ReviewPage() {
                         {report.aiAnalysis.pollutants.map((p) => (
                           <span
                             key={p}
-                            className="rounded bg-background px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+                            className="bg-background text-muted-foreground rounded px-1.5 py-0.5 text-xs font-medium"
                           >
                             {p}
                           </span>
@@ -207,7 +226,7 @@ export default function ReviewPage() {
 
                 {/* Footer: upvotes + action buttons */}
                 <div className="flex items-center justify-between border-t pt-3">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
                     <span>👍 {report.upvotes} upvotes</span>
                     {report.verifiedBy.length > 0 && (
                       <span>

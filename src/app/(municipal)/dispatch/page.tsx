@@ -13,7 +13,11 @@ import {
   DISPATCH_STATUS_CONFIG,
 } from '@/types/alert';
 import { SOURCE_TYPE_CONFIG } from '@/types/report';
-import type { AlertPriority, DispatchStatus, ResourceType } from '@/types/alert';
+import type {
+  AlertPriority,
+  DispatchStatus,
+  ResourceType,
+} from '@/types/alert';
 
 export default function DispatchPage() {
   const alerts = getSampleAlerts();
@@ -23,7 +27,10 @@ export default function DispatchPage() {
   const [deployingId, setDeployingId] = useState<string | null>(null);
 
   const activeAlerts = alerts.filter(
-    (a) => a.status === 'active' || a.status === 'dispatched' || a.status === 'acknowledged',
+    (a) =>
+      a.status === 'active' ||
+      a.status === 'dispatched' ||
+      a.status === 'acknowledged',
   );
   const activeDispatches = dispatches.filter(
     (d) => d.status !== 'completed' && d.status !== 'cancelled',
@@ -56,12 +63,13 @@ export default function DispatchPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {activeAlerts.map((alert) => {
-            const priorityCfg = ALERT_PRIORITY_CONFIG[alert.priority as AlertPriority];
+            const priorityCfg =
+              ALERT_PRIORITY_CONFIG[alert.priority as AlertPriority];
             const sourceCfg = SOURCE_TYPE_CONFIG[alert.sourceType];
             return (
               <div
                 key={alert.id}
-                className="group rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group bg-card rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 {/* Header row */}
                 <div className="mb-3 flex items-start justify-between gap-2">
@@ -84,7 +92,7 @@ export default function DispatchPage() {
                 </div>
 
                 {/* Title */}
-                <h3 className="mb-1.5 text-sm font-semibold leading-snug">
+                <h3 className="mb-1.5 text-sm leading-snug font-semibold">
                   {alert.title}
                 </h3>
 
@@ -112,7 +120,7 @@ export default function DispatchPage() {
                 </div>
 
                 {/* Recommended action */}
-                <p className="text-muted-foreground rounded-lg bg-muted/50 px-3 py-2 text-xs leading-relaxed">
+                <p className="text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 text-xs leading-relaxed">
                   💡 {alert.recommendedAction}
                 </p>
               </div>
@@ -137,15 +145,19 @@ export default function DispatchPage() {
             return (
               <div
                 key={resource.id}
-                className="group rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group bg-card rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="mb-3 flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-xl">
+                  <span className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg text-xl">
                     {typeCfg.emoji}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-semibold">{resource.name}</h3>
-                    <p className="text-muted-foreground text-xs">{typeCfg.label}</p>
+                    <h3 className="truncate text-sm font-semibold">
+                      {resource.name}
+                    </h3>
+                    <p className="text-muted-foreground text-xs">
+                      {typeCfg.label}
+                    </p>
                   </div>
                 </div>
 
@@ -176,7 +188,7 @@ export default function DispatchPage() {
                       type="button"
                       onClick={() => handleDeploy(resource.id)}
                       disabled={isDeploying}
-                      className="rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-all duration-150 hover:bg-primary/90 hover:shadow-sm active:scale-95 disabled:opacity-60"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-150 hover:shadow-sm active:scale-95 disabled:opacity-60"
                     >
                       {isDeploying ? (
                         <span className="flex items-center gap-1.5">
@@ -206,18 +218,22 @@ export default function DispatchPage() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           {activeDispatches.map((dispatch) => {
-            const statusCfg = DISPATCH_STATUS_CONFIG[dispatch.status as DispatchStatus];
-            const resourceCfg = RESOURCE_TYPE_CONFIG[dispatch.resourceType as ResourceType];
+            const statusCfg =
+              DISPATCH_STATUS_CONFIG[dispatch.status as DispatchStatus];
+            const resourceCfg =
+              RESOURCE_TYPE_CONFIG[dispatch.resourceType as ResourceType];
             return (
               <div
                 key={dispatch.id}
-                className="group rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                className="group bg-card rounded-xl border p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{resourceCfg.emoji}</span>
                     <div>
-                      <h3 className="text-sm font-semibold">{dispatch.resourceName}</h3>
+                      <h3 className="text-sm font-semibold">
+                        {dispatch.resourceName}
+                      </h3>
                       <p className="text-muted-foreground text-xs">
                         {resourceCfg.label}
                       </p>
@@ -241,18 +257,20 @@ export default function DispatchPage() {
                 <div className="text-muted-foreground space-y-1 text-xs">
                   <p>📍 {dispatch.targetLocation.address}</p>
                   {dispatch.eta && (
-                    <p className="font-medium text-foreground">
+                    <p className="text-foreground font-medium">
                       ⏱ ETA: {dispatch.eta}
                     </p>
                   )}
-                  {dispatch.distanceKm && <p>🛣 Distance: {dispatch.distanceKm} km</p>}
+                  {dispatch.distanceKm && (
+                    <p>🛣 Distance: {dispatch.distanceKm} km</p>
+                  )}
                 </div>
               </div>
             );
           })}
 
           {activeDispatches.length === 0 && (
-            <div className="text-muted-foreground col-span-full rounded-xl border border-dashed bg-card p-8 text-center text-sm">
+            <div className="text-muted-foreground bg-card col-span-full rounded-xl border border-dashed p-8 text-center text-sm">
               No active dispatches. Deploy a resource from above to get started.
             </div>
           )}
