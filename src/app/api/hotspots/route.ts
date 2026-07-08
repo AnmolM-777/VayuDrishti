@@ -5,36 +5,35 @@
  * Query params: ?status=detected&severity=critical (optional filters)
  */
 
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 
-import { getSampleHotspots } from '@/lib/sample-data';
-import type { PollutionHotspot, HotspotStatus, HotspotSeverity } from '@/types/hotspot';
+import {
+  handleApiError,
+  ok,
+  parseSearchParams,
+  requestId,
+} from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
+import { getHotspots } from '@/lib/server/repositories';
+import { hotspotsQuerySchema } from '@/lib/server/validation';
+import type { PollutionHotspot } from '@/types/hotspot';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const id = requestId();
+  const context = { route: '/api/hotspots', requestId: id };
+
   try {
-    const status = request.nextUrl.searchParams.get('status') as HotspotStatus | null;
-    const severity = request.nextUrl.searchParams.get('severity') as HotspotSeverity | null;
-
-    let hotspots: PollutionHotspot[] = getSampleHotspots();
-
-    if (status) {
-      hotspots = hotspots.filter((h) => h.status === status);
-    }
-    if (severity) {
-      hotspots = hotspots.filter((h) => h.severity === severity);
-    }
-
-    // Sort by severity score (highest first)
-    hotspots.sort((a, b) => b.severityScore - a.severityScore);
-
-    return NextResponse.json({ success: true, hotspots });
-  } catch (error) {
-    console.error('[/api/hotspots] Error:', error);
-    return NextResponse.json(
-      { success: false, hotspots: [], error: 'Failed to fetch hotspots' },
-      { status: 500 },
+    await requireApiUser(request);
+    const filters = parseSearchParams(
+      request.nextUrl.searchParams,
+      hotspotsQuerySchema,
     );
+    const hotspots: PollutionHotspot[] = await getHotspots(filters);
+
+    return ok({ success: true, hotspots });
+  } catch (error) {
+    return handleApiError(error, context);
   }
 }
-
-
