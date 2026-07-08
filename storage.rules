@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function hasSafeSize() {
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    function hasRole(role) {
+      return signedIn()
+        && (
+          request.auth.token.role == role
+          || (request.auth.token.roles is list && role in request.auth.token.roles)
+        );
+    }
+
+    match /reports/{userId}/{fileName} {
+      allow read: if signedIn();
+      allow write: if isOwner(userId) && isImage() && hasSafeSize();
+      allow delete: if isOwner(userId) || hasRole('admin');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
