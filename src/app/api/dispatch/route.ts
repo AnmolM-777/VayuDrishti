@@ -5,72 +5,44 @@
  * Request body: { alertId, hotspotId, resourceId, notes? }
  */
 
-import { NextResponse } from 'next/server';
+import { handleApiError, ok, parseJson, requestId } from '@/lib/server/api';
+import { requireApiUser } from '@/lib/server/auth';
+import { createDispatchOrder, getDispatches } from '@/lib/server/repositories';
+import { createDispatchRequestSchema } from '@/lib/server/validation';
+import type { CreateDispatchResponse } from '@/types/alert';
 
-import { getSampleResources } from '@/lib/sample-data';
-import type { CreateDispatchRequest, CreateDispatchResponse, DispatchOrder } from '@/types/alert';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
+  const id = requestId();
+  const context = { route: '/api/dispatch', requestId: id };
+
   try {
-    const body = (await request.json()) as CreateDispatchRequest;
+    const user = await requireApiUser(request, ['municipal']);
+    const body = await parseJson(request, createDispatchRequestSchema);
+    const dispatch = await createDispatchOrder({
+      ...body,
+      assignedBy: user.uid,
+    });
 
-    if (!body.alertId || !body.hotspotId || !body.resourceId) {
-      return NextResponse.json<CreateDispatchResponse>(
-        { success: false, error: 'alertId, hotspotId, and resourceId are required' },
-        { status: 400 },
-      );
-    }
-
-    // Find the resource
-    const resources = getSampleResources();
-    const resource = resources.find((r) => r.id === body.resourceId);
-
-    if (!resource) {
-      return NextResponse.json<CreateDispatchResponse>(
-        { success: false, error: `Resource ${body.resourceId} not found` },
-        { status: 404 },
-      );
-    }
-
-    if (!resource.isAvailable) {
-      return NextResponse.json<CreateDispatchResponse>(
-        { success: false, error: `Resource ${resource.name} is not available` },
-        { status: 409 },
-      );
-    }
-
-    // Create dispatch order
-    const dispatch: DispatchOrder = {
-      id: `dsp-${Date.now()}`,
-      alertId: body.alertId,
-      hotspotId: body.hotspotId,
-      resourceId: resource.id,
-      resourceType: resource.type,
-      resourceName: resource.name,
-      status: 'assigned',
-      targetLocation: resource.location, // Will be overridden by hotspot location
-      assignedAt: new Date().toISOString(),
-      eta: `${Math.floor(Math.random() * 15 + 5)} min`,
-      distanceKm: Math.round((Math.random() * 8 + 2) * 10) / 10,
-      notes: body.notes,
-      assignedBy: 'demo-operator',
-    };
-
-    return NextResponse.json<CreateDispatchResponse>({
+    return ok<CreateDispatchResponse>({
       success: true,
       dispatch,
     });
   } catch (error) {
-    console.error('[/api/dispatch] Error:', error);
-    return NextResponse.json<CreateDispatchResponse>(
-      { success: false, error: 'Failed to create dispatch' },
-      { status: 500 },
-    );
+    return handleApiError(error, context);
   }
 }
 
 // GET — list all dispatches
-export async function GET() {
-  const { getSampleDispatches } = await import('@/lib/sample-data');
-  return NextResponse.json({ success: true, dispatches: getSampleDispatches() });
+export async function GET(request: Request) {
+  const id = requestId();
+  const context = { route: '/api/dispatch', requestId: id };
+
+  try {
+    await requireApiUser(request, ['municipal']);
+    return ok({ success: true, dispatches: await getDispatches() });
+  } catch (error) {
+    return handleApiError(error, context);
+  }
 }
