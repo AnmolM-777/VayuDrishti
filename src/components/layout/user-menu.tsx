@@ -20,7 +20,12 @@ export function UserMenu() {
   const router = useRouter();
 
   const initials = user?.displayName
-    ? user.displayName.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+    ? user.displayName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
     : 'VD';
 
   async function handleSignOut() {
@@ -39,8 +44,12 @@ export function UserMenu() {
             aria-label="User menu"
           >
             <Avatar className="size-7">
-              {user?.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />}
-              <AvatarFallback className="text-xs bg-primary text-primary-foreground">{initials}</AvatarFallback>
+              {user?.photoURL && (
+                <AvatarImage src={user.photoURL} alt={user.displayName ?? ''} />
+              )}
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                {initials}
+              </AvatarFallback>
             </Avatar>
           </Button>
         }
@@ -48,8 +57,10 @@ export function UserMenu() {
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuLabel>
           <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-sm">{user?.displayName ?? 'Demo User'}</span>
-            <span className="text-xs text-muted-foreground font-normal truncate">
+            <span className="text-sm font-semibold">
+              {user?.displayName ?? 'Demo User'}
+            </span>
+            <span className="text-muted-foreground truncate text-xs font-normal">
               {user?.email ?? 'Citizen Sentinel'}
             </span>
           </div>
@@ -69,7 +80,10 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {isFirebaseConfigured && user ? (
-          <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="text-destructive focus:text-destructive"
+          >
             <LogOut className="mr-2 size-4" />
             Sign out
           </DropdownMenuItem>
